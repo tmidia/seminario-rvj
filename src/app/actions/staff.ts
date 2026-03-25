@@ -37,8 +37,8 @@ export async function createStaff(data: FormData) {
       return { error: authError?.message || "Erro ao criar usuário Auth" }
     }
 
-    // Insert profile explicitly
-    const { error: profileError } = await adminClient.from('profiles').insert({
+    // Insert or update profile explicitly (handles if a database trigger already created it)
+    const { error: profileError } = await adminClient.from('profiles').upsert({
       id: newAuthUser.user.id,
       full_name: fullName,
       role: role
@@ -47,7 +47,7 @@ export async function createStaff(data: FormData) {
     if (profileError) {
       // Attempt rollback
       await adminClient.auth.admin.deleteUser(newAuthUser.user.id)
-      return { error: "Erro ao criar perfil. Usuário Auth removido." }
+      return { error: `Erro ao criar perfil. Detalhe: ${profileError.message}` }
     }
 
     revalidatePath("/admin/usuarios")
