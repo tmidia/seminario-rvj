@@ -8,7 +8,7 @@ import { createStudent } from "@/app/actions/students"
 import { AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-export function StudentForm({ courses }: { courses: any[] }) {
+export function StudentForm({ courses }: { courses: { id: number, title: string }[] }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -21,8 +21,8 @@ export function StudentForm({ courses }: { courses: any[] }) {
       const form = document.getElementById("student-form") as HTMLFormElement
       if (form) form.reset()
       router.refresh()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError((e as Error).message)
     } finally {
       setLoading(false)
     }

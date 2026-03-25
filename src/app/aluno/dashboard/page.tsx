@@ -11,8 +11,8 @@ export default async function AlunoDashboard() {
   
   if (!profile) return <div>Perfil não encontrado.</div>
 
-  const courseIds = profile.enrollments?.map((e: any) => e.course_id) || []
-  const courseTitles = profile.enrollments?.map((e: any) => e.courses?.title).join(" e ")
+  const courseIds = profile.enrollments?.map((e: { course_id: number }) => e.course_id) || []
+  const courseTitles = profile.enrollments?.map((e: { courses: { title: string } }) => e.courses?.title).join(" e ")
 
   const { data: subjects } = await supabase.from('subjects').select('*, exams(*)').in('course_id', courseIds).order('course_id').order('order_index')
   const { data: attempts } = await supabase.from('exam_attempts').select('exam_id, score, status').eq('user_id', profile.id).eq('status', 'completed')

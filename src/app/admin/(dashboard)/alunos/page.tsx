@@ -58,7 +58,7 @@ export default async function AlunosPage() {
                       <td className="px-4 py-3">{aluno.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</td>
                       <td className="px-4 py-3">
                         {aluno.enrollments && aluno.enrollments.length > 0 
-                          ? aluno.enrollments.map((e: any) => e.courses?.title).join(", ") 
+                          ? aluno.enrollments.map((e: { courses: { title: string } }) => e.courses?.title).join(", ") 
                           : 'N/A'}
                       </td>
                       <td className="px-4 py-3">{new Date(aluno.created_at).toLocaleDateString('pt-BR')}</td>
