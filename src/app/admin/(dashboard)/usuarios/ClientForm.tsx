@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createStaff } from "@/app/actions/staff"
 import { Plus, AlertCircle, ShieldCheck } from "lucide-react"
 
@@ -78,16 +77,16 @@ export function StaffForm() {
             </div>
 
             <div>
-              <Label className="text-slate-600 font-semibold mb-2 block">Nível de Permissão</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="professor">Professor (Visualização e Notas)</SelectItem>
-                  <SelectItem value="admin">Administrador (Acesso Total)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="role" className="text-slate-600 font-semibold mb-2 block">Nível de Permissão</Label>
+              <select 
+                id="role"
+                value={role} 
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="professor">Professor (Visualização e Notas)</option>
+                <option value="admin">Administrador (Acesso Total)</option>
+              </select>
             </div>
           </div>
 
