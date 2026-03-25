@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createStaff } from "@/app/actions/staff"
 import { Plus, AlertCircle, ShieldCheck } from "lucide-react"
+import { CpfInput } from "@/components/CpfInput"
 
 export function StaffForm() {
   const [open, setOpen] = useState(false)
@@ -67,6 +68,11 @@ export function StaffForm() {
             <div>
               <Label htmlFor="full_name" className="text-slate-600 font-semibold">Nome Completo</Label>
               <Input id="full_name" name="full_name" required className="mt-1" placeholder="Ex: Rev. João Silva" />
+            </div>
+
+            <div>
+              <Label htmlFor="cpf" className="text-slate-600 font-semibold">CPF</Label>
+              <CpfInput id="cpf" name="cpf" required className="mt-1" placeholder="000.000.000-00" />
             </div>
 
             <div>

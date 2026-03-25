@@ -19,8 +19,11 @@ export async function createStaff(data: FormData) {
     const password = data.get("password") as string
     const fullName = data.get("full_name") as string
     const role = data.get("role") as string // 'admin' or 'professor'
+    const rawCpf = data.get("cpf") as string
+    const cpf = rawCpf ? rawCpf.replace(/\D/g, '') : ""
 
-    if (!email || !password || !fullName || !role) return { error: "Preencha todos os campos" }
+    if (!email || !password || !fullName || !role || !cpf) return { error: "Preencha todos os campos" }
+    if (cpf.length !== 11) return { error: "CPF inválido." }
     if (password.length < 6) return { error: "A senha deve ter no mínimo 6 caracteres" }
 
     const adminClient = createAdminClient()
@@ -41,7 +44,8 @@ export async function createStaff(data: FormData) {
     const { error: profileError } = await adminClient.from('profiles').upsert({
       id: newAuthUser.user.id,
       full_name: fullName,
-      role: role
+      role: role,
+      cpf: cpf
     })
 
     if (profileError) {
