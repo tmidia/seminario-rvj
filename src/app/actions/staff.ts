@@ -52,8 +52,11 @@ export async function createStaff(data: FormData) {
 
     revalidatePath("/admin/usuarios")
     return { success: true }
-  } catch (err: any) {
-    return { error: err.message || "Erro interno ao cadastrar servidor" }
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return { error: err.message || "Erro interno ao cadastrar servidor" }
+    }
+    return { error: "Erro interno ao cadastrar servidor" }
   }
 }
 
