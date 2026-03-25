@@ -36,8 +36,8 @@ export function NewStudentDialog({ courses }: { courses: Course[] }) {
       await createStudent(formData)
       setOpen(false)
       router.refresh()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Erro desconhecido")
     } finally {
       setLoading(false)
     }
@@ -107,8 +107,8 @@ export function EditStudentDialog({ student, courses }: { student: Student, cour
       await updateStudent(student.id, formData)
       setOpen(false)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido")
     } finally {
       setLoading(false)
     }
@@ -175,8 +175,8 @@ export function ToggleStudentStatusButton({ student }: { student: Student }) {
     try {
       await updateStudentStatus(student.id, student.status || 'ativo')
       router.refresh()
-    } catch (e: any) {
-      alert(e.message)
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Erro desconhecido")
       setLoading(false)
     }
   }

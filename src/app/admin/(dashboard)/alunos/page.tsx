@@ -59,8 +59,8 @@ export default async function AlunosPage() {
                     <td className="px-4 py-3 text-slate-500">{new Date(aluno.created_at).toLocaleDateString('pt-BR')}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <EditStudentDialog student={aluno as any} courses={courses || []} />
-                        <ToggleStudentStatusButton student={aluno as any} />
+                        <EditStudentDialog student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} courses={courses || []} />
+                        <ToggleStudentStatusButton student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} />
                       </div>
                     </td>
                   </tr>
