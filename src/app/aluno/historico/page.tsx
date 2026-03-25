@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Award } from "lucide-react"
+import { Award, Lock } from "lucide-react"
 import Link from "next/link"
 
 export default async function HistoricoPage() {
@@ -20,25 +20,24 @@ export default async function HistoricoPage() {
     .order('finished_at', { ascending: false })
 
   // Validate which courses are fully completed
-  const completedCourses: { id: number, title: string }[] = []
+  const coursesStatus: { id: number, title: string, isCompleted: boolean, passedCount: number, totalCount: number }[] = []
   
-  if (profile?.enrollments && attempts) {
+  if (profile?.enrollments) {
     const passedSubjectIds = new Set(
       attempts
-        .filter(a => a.status === 'completed' && a.score !== null && parseFloat(a.score) >= 7.0)
-        .map(a => a.exams?.subject_id)
+        ?.filter(a => a.status === 'completed' && a.score !== null && parseFloat(a.score) >= 7.0)
+        .map(a => a.exams?.subject_id) || []
     )
 
     profile.enrollments.forEach((enrollment: { courses: { id: number, title: string, subjects: { id: number }[] } }) => {
       const course = enrollment.courses
       if (!course || !course.subjects || course.subjects.length === 0) return
       
-      const hasPassedAll = course.subjects.every((sub: { id: number }) => passedSubjectIds.has(sub.id))
-      // In a real scenario, make sure they passed all required subjects.
-      // E.g., if the course has 12 subjects, they must have 12 passed. 
-      if (hasPassedAll) {
-        completedCourses.push({ id: course.id, title: course.title })
-      }
+      const totalCount = course.subjects.length
+      const passedCount = course.subjects.filter((sub: { id: number }) => passedSubjectIds.has(sub.id)).length
+      const isCompleted = passedCount === totalCount
+      
+      coursesStatus.push({ id: course.id, title: course.title, isCompleted, passedCount, totalCount })
     })
   }
 
@@ -48,23 +47,35 @@ export default async function HistoricoPage() {
         <h1 className="text-3xl font-bold font-serif text-[#0a3a2a]">Meu Histórico de Provas</h1>
       </div>
 
-      {completedCourses.map(course => (
-        <Card key={course.id} className="bg-gradient-to-br from-[#0a3a2a] to-[#0d4a36] border-[#c29a4b] border-2 shadow-xl">
+      {coursesStatus.map(course => (
+        <Card key={course.id} className={`overflow-hidden border-2 shadow-xl ${course.isCompleted ? 'bg-gradient-to-br from-[#0a3a2a] to-[#0d4a36] border-[#c29a4b]' : 'bg-white border-slate-200'}`}>
           <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4 text-white">
-              <div className="p-3 bg-[#c29a4b]/20 rounded-full">
-                <Award size={40} className="text-[#c29a4b]" />
+            <div className={`flex items-center gap-4 ${course.isCompleted ? 'text-white' : 'text-slate-800'}`}>
+              <div className={`p-3 rounded-full ${course.isCompleted ? 'bg-[#c29a4b]/20 text-[#c29a4b]' : 'bg-slate-100 text-slate-400'}`}>
+                {course.isCompleted ? <Award size={40} /> : <Lock size={40} />}
               </div>
               <div>
-                <h2 className="text-2xl font-bold font-serif text-[#c29a4b]">Parabéns!</h2>
-                <p className="text-slate-200 mt-1">Você concluiu com sucesso todas as matérias do curso <strong className="text-white">{course.title}</strong>.</p>
+                <h2 className={`text-2xl font-bold font-serif ${course.isCompleted ? 'text-[#c29a4b]' : 'text-slate-500'}`}>
+                  {course.isCompleted ? 'Parabéns!' : 'Certificado Final'}
+                </h2>
+                {course.isCompleted ? (
+                  <p className="text-slate-200 mt-1">Você concluiu com sucesso todas as matérias do curso <strong className="text-white">{course.title}</strong>.</p>
+                ) : (
+                  <p className="text-slate-500 mt-1">Conclua as matérias do curso <strong className="text-slate-700">{course.title}</strong> para liberar seu certificado. ({course.passedCount}/{course.totalCount} concluídas)</p>
+                )}
               </div>
             </div>
-            <Link href={`/aluno/certificado/${course.id}`} className="w-full md:w-auto">
-              <button className="w-full md:w-auto px-8 py-4 bg-[#c29a4b] hover:bg-[#b08b40] text-[#0a3a2a] rounded-lg font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
-                Emitir Certificado
+            {course.isCompleted ? (
+              <Link href={`/aluno/certificado/${course.id}`} className="w-full md:w-auto">
+                <button className="w-full md:w-auto px-8 py-4 bg-[#c29a4b] hover:bg-[#b08b40] text-[#0a3a2a] rounded-lg font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                  Emitir Certificado
+                </button>
+              </Link>
+            ) : (
+              <button disabled className="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-400 rounded-lg font-bold tracking-widest uppercase border border-slate-200 cursor-not-allowed">
+                Bloqueado
               </button>
-            </Link>
+            )}
           </CardContent>
         </Card>
       ))}
