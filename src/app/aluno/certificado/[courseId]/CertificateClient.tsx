@@ -102,7 +102,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           </svg>
 
           {/* Header */}
-          <div className="text-center mt-8 mb-10 relative z-10">
+          <div className="text-center mt-12 mb-6 relative z-10">
             <div className="flex justify-center mb-4">
                {/* Graduation Cap Icon */}
               <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-800">
@@ -113,36 +113,36 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             <p className="text-sm tracking-[0.3em] font-semibold text-slate-500 mt-2">REV. VALDEMAR DE JESUS SILVA</p>
           </div>
 
-          <p className="text-xl font-medium text-slate-700 tracking-wide mt-2">O Seminário Teológico Rev. Valdemar de Jesus Silva, concede a</p>
+          <p className="text-lg font-medium text-slate-700 tracking-wide mt-2">O Seminário Teológico Rev. Valdemar de Jesus Silva, concede a</p>
 
           {/* Dynamic Student Name */}
-          <div className="my-10 text-center w-full px-20">
-            <h2 className={`${greatVibes.className} text-[80px] leading-none text-[#0a3a2a] border-b border-slate-300 inline-block px-12 pb-2`}>
+          <div className="my-6 text-center w-full px-20">
+            <h2 className={`${greatVibes.className} text-[68px] leading-none text-[#0a3a2a] border-b border-slate-300 inline-block px-12 pb-2`}>
               {studentName}
             </h2>
           </div>
 
-          <p className="text-xl font-medium text-slate-700 tracking-wide">o certificado de conclusão do curso</p>
+          <p className="text-lg font-medium text-slate-700 tracking-wide">o certificado de conclusão do curso</p>
           
-          <h3 className="text-4xl font-black text-[#0a3a2a] uppercase tracking-widest mt-6 mb-8">
-            {courseTitle} Em Teologia
+          <h3 className="text-4xl font-black text-[#0a3a2a] uppercase tracking-widest mt-6 mb-6">
+            {courseTitle}
           </h3>
 
-          <p className="text-xl font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
+          <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
             concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD),<br/>com carga horária de {hours} horas.
           </p>
 
           {/* Bottom Seal & Footer */}
-          <div className="absolute bottom-16 w-full flex justify-center items-center px-24">
-            <div className="w-32 h-32 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative">
+          <div className="absolute bottom-20 right-32">
+            <div className="w-28 h-28 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative opacity-80 backdrop-blur-sm">
                {/* Fake Seal Text */}
-               <div className="text-[8px] font-bold text-[#0a3a2a] uppercase text-center w-24">
-                 Convenção Estadual<br/>das Assembleias de Deus<br/>no Acre
+               <div className="text-[7px] font-bold text-[#0a3a2a] uppercase text-center w-20">
+                 Convenção<br/>Estadual das<br/>Assembleias de Deus<br/>no Acre
                </div>
             </div>
           </div>
 
-          <div className="absolute bottom-6 w-full text-center px-24">
+          <div className="absolute bottom-8 w-full text-center px-24">
              <p className="text-[10px] text-slate-400">Este certificado é emitido de acordo com o Decreto nº 5.154, de 23 de julho de 2004, que regulamenta a oferta de cursos livres no Brasil.</p>
           </div>
         </div>
@@ -160,22 +160,22 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           <svg className="absolute bottom-4 right-4 w-16 h-16 text-[#c29a4b] rotate-180" viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L50,0 C20,0 0,20 0,50 L0,0 Z" /></svg>
 
           {/* Subjects Body Container */}
-          <div className="mt-16 bg-[#fdfbf6] p-12 w-[60%] flex flex-col items-center rounded-3xl border border-[#c29a4b]/20 shadow-sm relative z-10">
-            <h2 className="text-3xl font-black text-[#0a3a2a] tracking-widest mb-8">MATÉRIAS</h2>
+          <div className="mt-12 bg-[#fdfbf6] p-8 w-[80%] flex flex-col items-center rounded-3xl border border-[#c29a4b]/20 shadow-sm relative z-10">
+            <h2 className="text-2xl font-black text-[#0a3a2a] tracking-widest mb-6">MATÉRIAS</h2>
             
-            <div className="flex flex-col w-full px-8 gap-3">
+            <div className="grid grid-cols-2 w-full px-4 gap-y-3 gap-x-12">
               {subjects.map((sub, idx) => (
-                <div key={idx} className="text-center text-xl font-medium text-slate-800">
+                <div key={idx} className="text-left text-[17px] font-medium text-slate-800 border-b border-dashed border-slate-200 pb-1">
                   {sub.title}
                 </div>
               ))}
             </div>
+            
+            <p className="mt-8 text-md font-medium text-slate-600">Rio Branco, {completionDate}.</p>
           </div>
 
-          <p className="mt-12 text-lg font-medium text-slate-700">Rio Branco, {completionDate}.</p>
-
           {/* Signatures Container */}
-          <div className="absolute bottom-32 w-full px-32 flex justify-between items-end">
+          <div className="absolute bottom-28 w-full px-24 flex justify-between items-end">
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
                 {/* Simulated Signature */}
@@ -196,14 +196,13 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
-                <span className={`${greatVibes.className} text-3xl text-slate-400 absolute bottom-1`}>Assinatura</span>
               </div>
               <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">Aluno(a)</p>
             </div>
           </div>
 
-          <div className="absolute bottom-6 w-full text-center px-24">
-             <p className="text-[10px] text-slate-400">Este certificado é emitido de acordo com o Decreto nº 5.154, de 23 de julho de 2004, que regulamenta a oferta de cursos livres no Brasil.</p>
+          <div className="absolute bottom-8 w-full text-center px-24">
+             <p className="text-[10px] text-slate-400">Este documento é parte integrante do histórico correspondente, emitido em duas vias.</p>
           </div>
         </div>
       </div>
