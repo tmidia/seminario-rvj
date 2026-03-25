@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient as createServerClient } from "@/utils/supabase/server"
+import { isValidCPF } from "@/utils/cpf"
 
 export async function createStudent(data: FormData) {
   const adminSupabase = createServerClient()
@@ -11,6 +11,8 @@ export async function createStudent(data: FormData) {
 
   const rawCpf = data.get("cpf") as string
   const cpf = rawCpf.replace(/\D/g, '')
+
+  if (!isValidCPF(cpf)) throw new Error("CPF Inválido. Verifique os números digitados.")
   const fullName = data.get("full_name") as string
   const courseIds = data.getAll("course_ids").map(id => parseInt(id as string))
 

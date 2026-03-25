@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
+import { isValidCPF } from "@/utils/cpf"
 import { Button } from "@/components/ui/button"
 import { CpfInput } from "@/components/CpfInput"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
@@ -13,8 +14,8 @@ async function loginStudent(data: FormData) {
   const rawCpf = data.get("cpf") as string
   const cpf = rawCpf.replace(/\D/g, "")
   
-  if (cpf.length !== 11) {
-    redirect("/?error=CPF Inválido")
+  if (!isValidCPF(cpf)) {
+    redirect("/?error=CPF Inválido! O número informado matematicamente não existe.")
   }
 
   const { error: signInError } = await supabase.auth.signInWithPassword({

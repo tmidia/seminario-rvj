@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { createStudent } from "@/app/actions/students"
 import { AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { isValidCPF } from "@/utils/cpf"
 
 export function StudentForm({ courses }: { courses: { id: number, title: string }[] }) {
   const router = useRouter()
@@ -16,6 +17,14 @@ export function StudentForm({ courses }: { courses: { id: number, title: string 
   const handleSubmit = async (formData: FormData) => {
     setError(null)
     setLoading(true)
+
+    const cpfValue = formData.get("cpf") as string
+    if (!isValidCPF(cpfValue)) {
+      setError("O CPF digitado não é válido.")
+      setLoading(false)
+      return
+    }
+
     try {
       await createStudent(formData)
       const form = document.getElementById("student-form") as HTMLFormElement
