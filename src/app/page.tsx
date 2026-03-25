@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { CpfInput } from "@/components/CpfInput"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import Link from "next/link"
+import { Shield } from "lucide-react"
 
 async function loginStudent(data: FormData) {
   "use server"
@@ -69,8 +71,11 @@ export default async function StudentLogin({ searchParams }: { searchParams: { e
         </form>
       </Card>
       
-      <div className="mt-8 text-white/50 text-sm">
-        Acesso restrito para alunos matriculados.
+      <div className="mt-8 flex flex-col items-center gap-2 text-white/50 text-sm">
+        <span>Acesso restrito para alunos matriculados.</span>
+        <Link href="/admin/login" className="hover:text-white transition-colors flex items-center gap-1 opacity-70 hover:opacity-100">
+          <Shield size={14} /> Área do Professor
+        </Link>
       </div>
     </div>
   )
