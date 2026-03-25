@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { createClient as createServerClient } from "@/utils/supabase/server"
 import { isValidCPF } from "@/utils/cpf"
 
 export async function createStudent(data: FormData) {
