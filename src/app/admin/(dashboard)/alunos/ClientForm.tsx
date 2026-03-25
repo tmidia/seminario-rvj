@@ -211,7 +211,7 @@ export function ApproveStudentButton({ student }: { student: Student }) {
       }
       alert("Sucesso! O aluno foi aprovado e já pode emitir o certificado pelo painel dele.")
       router.refresh()
-    } catch (e: unknown) {
+    } catch {
       alert("Erro desconhecido de rede.")
     } finally {
       setLoading(false)
