@@ -113,8 +113,13 @@ export async function approveStudentForCertificates(studentId: string) {
   const { data: adminData } = await adminSupabase.auth.getUser()
   if (!adminData?.user) throw new Error("Não autorizado")
 
-  const { data: profile } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
-  const courseIds = profile?.enrollments.map((e: { course_id: number }) => e.course_id) || []
+  const { data: profile, error: profileErr } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
+  
+  if (profileErr || !profile) {
+    throw new Error(`Erro ao buscar perfil do aluno: ${profileErr?.message || 'Perfil inexistente'}.`)
+  }
+
+  const courseIds = profile.enrollments?.map((e: { course_id: number }) => e.course_id) || []
   
   if (courseIds.length === 0) throw new Error("O aluno não possui nenhuma matrícula.")
 
