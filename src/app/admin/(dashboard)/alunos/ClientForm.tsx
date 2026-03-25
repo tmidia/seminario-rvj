@@ -203,11 +203,16 @@ export function ApproveStudentButton({ student }: { student: Student }) {
     
     setLoading(true)
     try {
-      await approveStudentForCertificates(student.id)
+      const res = await approveStudentForCertificates(student.id)
+      if (res?.error) {
+        alert(res.error)
+        setLoading(false)
+        return
+      }
       alert("Sucesso! O aluno foi aprovado e já pode emitir o certificado pelo painel dele.")
       router.refresh()
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : "Erro desconhecido")
+      alert("Erro desconhecido de rede.")
     } finally {
       setLoading(false)
     }

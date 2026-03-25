@@ -109,50 +109,70 @@ export async function updateStudent(userId: string, data: FormData) {
 }
 
 export async function approveStudentForCertificates(studentId: string) {
-  const adminSupabase = createServerClient()
-  const { data: adminData } = await adminSupabase.auth.getUser()
-  if (!adminData?.user) throw new Error("Não autorizado")
+  try {
+    const adminSupabase = createServerClient()
+    const { data: adminData } = await adminSupabase.auth.getUser()
+    if (!adminData?.user) return { error: "Não autorizado" }
 
-  const { data: profile, error: profileErr } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
-  
-  if (profileErr || !profile) {
-    throw new Error(`Erro ao buscar perfil do aluno: ${profileErr?.message || 'Perfil inexistente'}.`)
+    const { data: profile, error: profileErr } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
+    
+    if (profileErr || !profile) {
+      return { error: `Erro ao buscar perfil do aluno: ${profileErr?.message || 'Perfil inexistente'}.` }
+    }
+
+    const courseIds = profile.enrollments?.map((e: { course_id: number }) => e.course_id) || []
+    
+    if (courseIds.length === 0) return { error: "O aluno não possui nenhuma matrícula ativa. Clique em Editar e selecione o curso dele antes de aprovar." }
+
+    // Get all subjects for enrolled courses and their exams
+    const { data: subjects } = await adminSupabase.from('subjects').select('id, exams(id)').in('course_id', courseIds)
+    
+    if (!subjects || subjects.length === 0) return { error: "Nenhuma matéria encontrada para os cursos matriculados." }
+
+    const missingExams = subjects.filter((s: { exams?: { id: number }[] }) => !s.exams || s.exams.length === 0)
+    if (missingExams.length > 0) {
+      // Auto-generate missing exams so the certificate can be emitted
+      const examsToCreate = missingExams.map((s: { id: number }) => ({
+        subject_id: s.id,
+        title: "Avaliação Automática (Aprovação Direta)",
+        time_limit_minutes: 120,
+        is_active: true
+      }))
+
+      const { data: newExams, error: createErr } = await adminSupabase.from('exams').insert(examsToCreate).select('id, subject_id')
+      if (createErr || !newExams) return { error: "Erro ao gerar provas automáticas: " + createErr?.message }
+
+      // Re-attach newly created exams to subjects so mapping works below
+      missingExams.forEach((s: { id: number, exams?: { id: number }[] }) => {
+        const created = newExams.find(ne => ne.subject_id === s.id)
+        if (created) s.exams = [{ id: created.id }]
+      })
+    }
+
+    const examIdsToApprove = subjects.map((s: { exams: { id: number }[] }) => s.exams[0].id)
+
+    // Clear existing attempts for those exact exams to prevent duplication
+    await adminSupabase.from('exam_attempts')
+      .delete()
+      .eq('user_id', studentId)
+      .in('exam_id', examIdsToApprove)
+
+    const attemptsToInsert = examIdsToApprove.map((examId: number) => ({
+      user_id: studentId,
+      exam_id: examId,
+      status: 'completed',
+      score: 10.0,
+      started_at: new Date().toISOString(),
+      finished_at: new Date().toISOString(),
+      answers: {}
+    }))
+
+    const { error } = await adminSupabase.from('exam_attempts').insert(attemptsToInsert)
+    if (error) return { error: "Erro ao gerar aprovações no sistema: " + error.message }
+
+    revalidatePath("/admin/alunos")
+    return { success: true }
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Erro crítico interno" }
   }
-
-  const courseIds = profile.enrollments?.map((e: { course_id: number }) => e.course_id) || []
-  
-  if (courseIds.length === 0) throw new Error("O aluno não possui nenhuma matrícula.")
-
-  // Get all subjects for enrolled courses and their exams
-  const { data: subjects } = await adminSupabase.from('subjects').select('id, exams(id)').in('course_id', courseIds)
-  
-  if (!subjects || subjects.length === 0) throw new Error("Nenhuma matéria encontrada para os cursos matriculados.")
-
-  const missingExams = subjects.filter((s: { exams?: { id: number }[] }) => !s.exams || s.exams.length === 0)
-  if (missingExams.length > 0) {
-    throw new Error(`Não é possível aprovar automaticamente: existem ${missingExams.length} matérias sem nenhuma prova cadastrada. Adicione pelo menos uma prova por matéria.`)
-  }
-
-  const examIdsToApprove = subjects.map((s: { exams: { id: number }[] }) => s.exams[0].id)
-
-  // Clear existing attempts for those exact exams to prevent duplication
-  await adminSupabase.from('exam_attempts')
-    .delete()
-    .eq('user_id', studentId)
-    .in('exam_id', examIdsToApprove)
-
-  const attemptsToInsert = examIdsToApprove.map((examId: number) => ({
-    user_id: studentId,
-    exam_id: examId,
-    status: 'completed',
-    score: 10.0,
-    started_at: new Date().toISOString(),
-    finished_at: new Date().toISOString(),
-    answers: {}
-  }))
-
-  const { error } = await adminSupabase.from('exam_attempts').insert(attemptsToInsert)
-  if (error) throw new Error("Erro ao gerar aprovações no sistema: " + error.message)
-
-  revalidatePath("/admin/alunos")
 }
