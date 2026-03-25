@@ -19,8 +19,9 @@ export default async function HistoricoPage() {
         <CardHeader>
           <CardTitle>Avaliações Realizadas</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-x-auto">
+        <CardContent className="p-0 md:p-6">
+          {/* Desktop Table View */}
+          <div className="hidden md:block rounded-md border overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-slate-50 text-slate-500 border-b">
                 <tr>
@@ -60,6 +61,49 @@ export default async function HistoricoPage() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card Stack View */}
+          <div className="md:hidden flex flex-col divide-y divide-slate-100">
+            {(!attempts || attempts.length === 0) && (
+              <div className="p-6 text-center text-slate-500 text-sm">Nenhum histórico encontrado.</div>
+            )}
+            {attempts?.map((attempt) => {
+              const score = attempt.score !== null ? parseFloat(attempt.score) : null
+              const isApproved = score !== null && score >= 7.0
+              return (
+                <div key={attempt.id} className="p-5 flex flex-col gap-3 hover:bg-slate-50 transition-colors">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm leading-tight">{attempt.exams?.subjects?.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{attempt.exams?.title}</p>
+                    </div>
+                    <span className={`shrink-0 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${attempt.status === 'completed' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {attempt.status === 'completed' ? 'Finalizada' : 'Andamento'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-end pt-3 border-t border-slate-100">
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mb-0.5">Execução</p>
+                      <p className="text-xs text-slate-600 font-medium">
+                        {attempt.finished_at ? new Date(attempt.finished_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Aguardando'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mb-0.5">Sua Nota</p>
+                      <p className="font-black text-lg leading-none">
+                        {score !== null ? (
+                          <span className={isApproved ? "text-green-600" : "text-red-600"}>
+                            {score.toFixed(1)} <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{isApproved ? 'Aprovado' : 'Reprovado'}</span>
+                          </span>
+                        ) : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
