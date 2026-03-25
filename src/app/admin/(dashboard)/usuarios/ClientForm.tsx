@@ -23,8 +23,12 @@ export function StaffForm() {
     formData.append("role", role)
 
     try {
-      await createStaff(formData)
-      setOpen(false)
+      const result = await createStaff(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setOpen(false)
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
