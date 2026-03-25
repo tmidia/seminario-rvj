@@ -40,7 +40,7 @@ export default async function StudentLogin({ searchParams }: { searchParams: { e
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a3a2a]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a3a2a] p-4">
       <div className="mb-8 text-center text-white px-4">
         <h1 className="text-3xl md:text-5xl font-serif font-bold text-[#c29a4b]">Seminário Teológico RVJ</h1>
         <p className="text-base md:text-xl opacity-80 mt-2">Plataforma de Avaliações Online</p>
