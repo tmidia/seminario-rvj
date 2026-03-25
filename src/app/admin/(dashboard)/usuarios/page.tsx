@@ -68,10 +68,7 @@ export default async function UsuariosPage() {
                     </td>
                     <td className="p-4 text-right">
                       {member.id !== user.id && (
-                        <form action={async () => {
-                          "use server"
-                          await deleteStaff(member.id)
-                        }}>
+                        <form action={deleteStaff.bind(null, member.id)}>
                           <Button variant="destructive" size="sm" className="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors">
                             <Trash2 size={16} />
                           </Button>
