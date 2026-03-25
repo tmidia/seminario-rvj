@@ -40,6 +40,10 @@ export default function AdminDashboardLayout({ children }: { children: ReactNode
             <BookOpen size={20} className="text-[#c29a4b]" />
             <span className="font-medium text-slate-100">Provas</span>
           </Link>
+          <Link href="/admin/usuarios" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
+            <Users size={20} className="text-[#c29a4b]" />
+            <span className="font-medium text-slate-100">Professores</span>
+          </Link>
         </nav>
         <div className="p-4 border-t border-white/10 bg-[#072a1e]">
           <form action="/api/auth/signout" method="POST">
