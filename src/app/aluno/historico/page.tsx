@@ -1,19 +1,73 @@
 import { createClient } from "@/utils/supabase/server"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Award } from "lucide-react"
+import Link from "next/link"
 
 export default async function HistoricoPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*, enrollments(courses(id, title, subjects(id)))')
+    .eq('id', user?.id)
+    .single()
+
   const { data: attempts } = await supabase
     .from('exam_attempts')
-    .select('*, exams(title, subjects(title))')
+    .select('*, exams(subject_id, title, subjects(title))')
     .eq('user_id', user?.id)
     .order('finished_at', { ascending: false })
 
+  // Validate which courses are fully completed
+  const completedCourses: { id: number, title: string }[] = []
+  
+  if (profile?.enrollments && attempts) {
+    const passedSubjectIds = new Set(
+      attempts
+        .filter(a => a.status === 'completed' && a.score !== null && parseFloat(a.score) >= 7.0)
+        .map(a => a.exams?.subject_id)
+    )
+
+    profile.enrollments.forEach((enrollment: { courses: { id: number, title: string, subjects: { id: number }[] } }) => {
+      const course = enrollment.courses
+      if (!course || !course.subjects || course.subjects.length === 0) return
+      
+      const hasPassedAll = course.subjects.every((sub: { id: number }) => passedSubjectIds.has(sub.id))
+      // In a real scenario, make sure they passed all required subjects.
+      // E.g., if the course has 12 subjects, they must have 12 passed. 
+      if (hasPassedAll) {
+        completedCourses.push({ id: course.id, title: course.title })
+      }
+    })
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold font-serif text-[#0a3a2a]">Meu Histórico de Provas</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h1 className="text-3xl font-bold font-serif text-[#0a3a2a]">Meu Histórico de Provas</h1>
+      </div>
+
+      {completedCourses.map(course => (
+        <Card key={course.id} className="bg-gradient-to-br from-[#0a3a2a] to-[#0d4a36] border-[#c29a4b] border-2 shadow-xl">
+          <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4 text-white">
+              <div className="p-3 bg-[#c29a4b]/20 rounded-full">
+                <Award size={40} className="text-[#c29a4b]" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold font-serif text-[#c29a4b]">Parabéns!</h2>
+                <p className="text-slate-200 mt-1">Você concluiu com sucesso todas as matérias do curso <strong className="text-white">{course.title}</strong>.</p>
+              </div>
+            </div>
+            <Link href={`/aluno/certificado/${course.id}`} className="w-full md:w-auto">
+              <button className="w-full md:w-auto px-8 py-4 bg-[#c29a4b] hover:bg-[#b08b40] text-[#0a3a2a] rounded-lg font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                Emitir Certificado
+              </button>
+            </Link>
+          </CardContent>
+        </Card>
+      ))}
       
       <Card>
         <CardHeader>
