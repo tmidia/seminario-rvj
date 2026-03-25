@@ -107,3 +107,47 @@ export async function updateStudent(userId: string, data: FormData) {
 
   revalidatePath("/admin/alunos")
 }
+
+export async function approveStudentForCertificates(studentId: string) {
+  const adminSupabase = createServerClient()
+  const { data: adminData } = await adminSupabase.auth.getUser()
+  if (!adminData?.user) throw new Error("Não autorizado")
+
+  const { data: profile } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
+  const courseIds = profile?.enrollments.map((e: any) => e.course_id) || []
+  
+  if (courseIds.length === 0) throw new Error("O aluno não possui nenhuma matrícula.")
+
+  // Get all subjects for enrolled courses and their exams
+  const { data: subjects } = await adminSupabase.from('subjects').select('id, exams(id)').in('course_id', courseIds)
+  
+  if (!subjects || subjects.length === 0) throw new Error("Nenhuma matéria encontrada para os cursos matriculados.")
+
+  const missingExams = subjects.filter((s: any) => !s.exams || s.exams.length === 0)
+  if (missingExams.length > 0) {
+    throw new Error(`Não é possível aprovar automaticamente: existem ${missingExams.length} matérias sem nenhuma prova cadastrada. Adicione pelo menos uma prova por matéria.`)
+  }
+
+  const examIdsToApprove = subjects.map((s: any) => s.exams[0].id)
+
+  // Clear existing attempts for those exact exams to prevent duplication
+  await adminSupabase.from('exam_attempts')
+    .delete()
+    .eq('user_id', studentId)
+    .in('exam_id', examIdsToApprove)
+
+  const attemptsToInsert = examIdsToApprove.map((examId: number) => ({
+    user_id: studentId,
+    exam_id: examId,
+    status: 'completed',
+    score: 10.0,
+    started_at: new Date().toISOString(),
+    finished_at: new Date().toISOString(),
+    answers: {}
+  }))
+
+  const { error } = await adminSupabase.from('exam_attempts').insert(attemptsToInsert)
+  if (error) throw new Error("Erro ao gerar aprovações no sistema: " + error.message)
+
+  revalidatePath("/admin/alunos")
+}

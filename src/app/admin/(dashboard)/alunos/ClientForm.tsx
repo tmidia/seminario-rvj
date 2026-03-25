@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CpfInput } from "@/components/CpfInput"
 import { Label } from "@/components/ui/label"
-import { createStudent, updateStudent, updateStudentStatus } from "@/app/actions/students"
-import { AlertCircle, UserPlus, Edit2, Power } from "lucide-react"
+import { createStudent, updateStudent, updateStudentStatus, approveStudentForCertificates } from "@/app/actions/students"
+import { AlertCircle, UserPlus, Edit2, Power, Award } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { isValidCPF } from "@/utils/cpf"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -190,6 +190,39 @@ export function ToggleStudentStatusButton({ student }: { student: Student }) {
       className={`h-8 ${isActive ? 'text-red-600 hover:text-red-700 hover:bg-red-50' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
     >
       <Power size={14} className="mr-1" /> {isActive ? 'Desativar' : 'Ativar'}
+    </Button>
+  )
+}
+
+export function ApproveStudentButton({ student }: { student: Student }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  const handleApprove = async () => {
+    if (!confirm(`Tem certeza que deseja APROVAR este aluno em TODAS as matérias do(s) curso(s) dele? Esta ação lançará notas automáticas máximas para que ele consiga emitir o certificado imediatamente.`)) return
+    
+    setLoading(true)
+    try {
+      await approveStudentForCertificates(student.id)
+      alert("Sucesso! O aluno foi aprovado e já pode emitir o certificado pelo painel dele.")
+      router.refresh()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "Erro desconhecido")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Button 
+      variant="outline"
+      size="sm" 
+      onClick={handleApprove} 
+      disabled={loading || student.status === 'inativo'}
+      className="h-8 text-[#c29a4b] hover:text-[#a6823c] hover:bg-[#fdfbf6] border-[#c29a4b]/30"
+      title="Gerar Notas Máximas e Liberar Certificado"
+    >
+      <Award size={14} className="mr-1" /> {loading ? "Aprovando..." : "Aprovar"}
     </Button>
   )
 }

@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { NewStudentDialog, EditStudentDialog, ToggleStudentStatusButton } from "./ClientForm"
+import { NewStudentDialog, EditStudentDialog, ToggleStudentStatusButton, ApproveStudentButton } from "./ClientForm"
 
 export default async function AlunosPage() {
   const supabase = createClient()
@@ -59,6 +59,7 @@ export default async function AlunosPage() {
                     <td className="px-4 py-3 text-slate-500">{new Date(aluno.created_at).toLocaleDateString('pt-BR')}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <ApproveStudentButton student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} />
                         <EditStudentDialog student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} courses={courses || []} />
                         <ToggleStudentStatusButton student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} />
                       </div>
