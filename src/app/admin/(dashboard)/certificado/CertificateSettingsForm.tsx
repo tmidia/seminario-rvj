@@ -11,6 +11,7 @@ import { Save, Loader2, Image as ImageIcon } from "lucide-react"
 interface Settings {
   id?: string;
   logo_url?: string;
+  seal_url?: string;
   signature_1_url?: string;
   signature_1_name?: string;
   signature_1_role?: string;
@@ -33,6 +34,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
     layout_scale: initialSettings.layout_scale || 1.0,
     margin_top: initialSettings.margin_top || 0,
     logo_url: initialSettings.logo_url || "",
+    seal_url: initialSettings.seal_url || "",
     signature_1_url: initialSettings.signature_1_url || "",
     signature_2_url: initialSettings.signature_2_url || "",
     bg_image_url: initialSettings.bg_image_url || "",
@@ -78,6 +80,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
           layout_scale: formData.layout_scale,
           margin_top: formData.margin_top,
           logo_url: formData.logo_url,
+          seal_url: formData.seal_url,
           signature_1_url: formData.signature_1_url,
           signature_2_url: formData.signature_2_url,
           bg_image_url: formData.bg_image_url,
@@ -113,6 +116,18 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             </div>
             <p className="text-xs text-slate-500 mt-1">Dica: Use PNG transparente com formato quadrado ou levemente retangular (Ex: 300x300px).</p>
             {formData.logo_url && <Button variant="link" className="text-xs text-red-500 p-0 mt-1" onClick={() => setFormData(p => ({...p, logo_url: ''}))}>Remover Logo</Button>}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Selo de Autenticidade (Canto Inferior Direito)</Label>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
+                {formData.seal_url ? <img src={formData.seal_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+              </div>
+              <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'seal_url')} disabled={loading} />
+            </div>
+            <p className="text-xs text-slate-500 mt-1">Dica: Use um brasão ou selo dourado em PNG transparente (Ex: 300x300px).</p>
+            {formData.seal_url && <Button variant="link" className="text-xs text-red-500 p-0 mt-1" onClick={() => setFormData(p => ({...p, seal_url: ''}))}>Remover Selo</Button>}
           </div>
 
           <div className="space-y-2">

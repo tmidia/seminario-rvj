@@ -21,6 +21,7 @@ interface CertificateProps {
   settings?: {
     bg_image_url?: string;
     logo_url?: string;
+    seal_url?: string;
     layout_scale?: number;
     margin_top?: number;
     signature_1_url?: string;
@@ -164,12 +165,16 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
           {/* Bottom Seal & Footer */}
           <div className="absolute bottom-20 right-32 z-20">
-            <div className="w-28 h-28 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative opacity-80 backdrop-blur-sm">
-               {/* Fake Seal Text */}
-               <div className="text-[7px] font-bold text-[#0a3a2a] uppercase text-center w-20">
-                 Convenção<br/>Estadual das<br/>Assembleias de Deus<br/>no Acre
-               </div>
-            </div>
+            {settings?.seal_url ? (
+              <img src={settings.seal_url} alt="Selo de Autenticidade" crossOrigin="anonymous" className="w-32 h-32 object-contain drop-shadow-md" />
+            ) : (
+              <div className="w-28 h-28 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative opacity-80 backdrop-blur-sm">
+                 {/* Fake Seal Text */}
+                 <div className="text-[7px] font-bold text-[#0a3a2a] uppercase text-center w-20">
+                   Convenção<br/>Estadual das<br/>Assembleias de Deus<br/>no Acre
+                 </div>
+              </div>
+            )}
           </div>
 
           <div className="absolute bottom-8 w-full text-center px-24 z-20">
