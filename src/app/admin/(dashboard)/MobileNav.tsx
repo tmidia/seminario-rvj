@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, X, LayoutDashboard, Users, BookOpen, LogOut } from "lucide-react"
+import { Menu, X, LayoutDashboard, Users, BookOpen, LogOut, Award } from "lucide-react"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
@@ -41,6 +41,9 @@ export function MobileNav() {
               </Link>
               <Link onClick={() => setOpen(false)} href="/admin/usuarios" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
                 <Users size={20} className="text-[#c29a4b]" /> <span className="font-medium text-slate-100">Professores</span>
+              </Link>
+              <Link onClick={() => setOpen(false)} href="/admin/certificado" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
+                <Award size={20} className="text-[#c29a4b]" /> <span className="font-medium text-slate-100">Certificados</span>
               </Link>
             </nav>
 

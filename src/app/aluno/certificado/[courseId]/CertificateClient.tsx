@@ -18,9 +18,10 @@ interface CertificateProps {
   hours: number;
   completionDate: string;
   subjects: Subject[];
+  settings?: any;
 }
 
-export function CertificateClient({ studentName, courseTitle, hours, completionDate, subjects }: CertificateProps) {
+export function CertificateClient({ studentName, courseTitle, hours, completionDate, subjects, settings }: CertificateProps) {
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -83,9 +84,14 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
       <div className="flex flex-col gap-12 text-slate-900 overflow-x-auto pb-12 items-center w-full">
         {/* --- FRONT PAGE --- */}
-        <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-center items-center shrink-0 border-[16px] border-[#0a3a2a]">
+        <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-center items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
+          {/* Custom Background Image */}
+          {settings?.bg_image_url && (
+            <img src={settings.bg_image_url} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
+          )}
+          
           {/* Inner Golden Border */}
-          <div className="absolute inset-2 border-[3px] border-[#c29a4b]"></div>
+          <div className="absolute inset-2 border-[3px] border-[#c29a4b] pointer-events-none z-10"></div>
           
           {/* Corner Flourishes (Simulated via SVG) */}
           <svg className="absolute top-4 left-4 w-16 h-16 text-[#c29a4b]" viewBox="0 0 100 100" fill="currentColor">
@@ -101,39 +107,52 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             <path d="M0,0 L50,0 C20,0 0,20 0,50 L0,0 Z" />
           </svg>
 
-          {/* Header */}
-          <div className="text-center mt-12 mb-6 relative z-10">
-            <div className="flex justify-center mb-4">
-               {/* Graduation Cap Icon */}
-              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-800">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-              </svg>
+          {/* SCALED & MARGINED CONTENT WRAPPER */}
+          <div 
+            className="flex flex-col items-center justify-center w-full z-20"
+            style={{ 
+              transform: `scale(${settings?.layout_scale || 1.0})`, 
+              transformOrigin: 'center', 
+              marginTop: `${settings?.margin_top || 0}px` 
+            }}
+          >
+            {/* Header */}
+            <div className="text-center mt-12 mb-6 relative">
+              <div className="flex justify-center mb-4">
+                 {settings?.logo_url ? (
+                   <img src={settings.logo_url} className="h-20 object-contain" alt="Logo" crossOrigin="anonymous" />
+                 ) : (
+                   <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-800">
+                     <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                   </svg>
+                 )}
+              </div>
+              <h1 className="text-3xl font-serif font-bold text-[#0a3a2a] tracking-wider uppercase">Seminário Teológico</h1>
+              <p className="text-sm tracking-[0.3em] font-semibold text-slate-500 mt-2">REV. VALDEMAR DE JESUS SILVA</p>
             </div>
-            <h1 className="text-3xl font-serif font-bold text-[#0a3a2a] tracking-wider uppercase">Seminário Teológico</h1>
-            <p className="text-sm tracking-[0.3em] font-semibold text-slate-500 mt-2">REV. VALDEMAR DE JESUS SILVA</p>
+
+            <p className="text-lg font-medium text-slate-700 tracking-wide mt-2">O Seminário Teológico Rev. Valdemar de Jesus Silva, concede a</p>
+
+            {/* Dynamic Student Name */}
+            <div className="my-6 text-center w-full px-20">
+              <h2 className={`${greatVibes.className} text-[68px] leading-none text-[#0a3a2a] border-b border-slate-300 inline-block px-12 pb-2`}>
+                {studentName}
+              </h2>
+            </div>
+
+            <p className="text-lg font-medium text-slate-700 tracking-wide">o certificado de conclusão do curso</p>
+            
+            <h3 className="text-4xl font-black text-[#0a3a2a] uppercase tracking-widest mt-6 mb-6">
+              {courseTitle}
+            </h3>
+
+            <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
+              concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD),<br/>com carga horária de {hours} horas.
+            </p>
           </div>
-
-          <p className="text-lg font-medium text-slate-700 tracking-wide mt-2">O Seminário Teológico Rev. Valdemar de Jesus Silva, concede a</p>
-
-          {/* Dynamic Student Name */}
-          <div className="my-6 text-center w-full px-20">
-            <h2 className={`${greatVibes.className} text-[68px] leading-none text-[#0a3a2a] border-b border-slate-300 inline-block px-12 pb-2`}>
-              {studentName}
-            </h2>
-          </div>
-
-          <p className="text-lg font-medium text-slate-700 tracking-wide">o certificado de conclusão do curso</p>
-          
-          <h3 className="text-4xl font-black text-[#0a3a2a] uppercase tracking-widest mt-6 mb-6">
-            {courseTitle}
-          </h3>
-
-          <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
-            concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD),<br/>com carga horária de {hours} horas.
-          </p>
 
           {/* Bottom Seal & Footer */}
-          <div className="absolute bottom-20 right-32">
+          <div className="absolute bottom-20 right-32 z-20">
             <div className="w-28 h-28 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative opacity-80 backdrop-blur-sm">
                {/* Fake Seal Text */}
                <div className="text-[7px] font-bold text-[#0a3a2a] uppercase text-center w-20">
@@ -142,16 +161,21 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             </div>
           </div>
 
-          <div className="absolute bottom-8 w-full text-center px-24">
+          <div className="absolute bottom-8 w-full text-center px-24 z-20">
              <p className="text-[10px] text-slate-400">Este certificado é emitido de acordo com o Decreto nº 5.154, de 23 de julho de 2004, que regulamenta a oferta de cursos livres no Brasil.</p>
           </div>
         </div>
 
 
         {/* --- BACK PAGE --- */}
-        <div ref={backRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col items-center shrink-0 border-[16px] border-[#0a3a2a]">
+        <div ref={backRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
+          {/* Custom Background Image */}
+          {settings?.bg_image_url && (
+            <img src={settings.bg_image_url} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
+          )}
+
           {/* Inner Golden Border */}
-          <div className="absolute inset-2 border-[3px] border-[#c29a4b]"></div>
+          <div className="absolute inset-2 border-[3px] border-[#c29a4b] z-10 pointer-events-none"></div>
           
           {/* Corner Flourishes */}
           <svg className="absolute top-4 left-4 w-16 h-16 text-[#c29a4b]" viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L50,0 C20,0 0,20 0,50 L0,0 Z" /></svg>
@@ -175,23 +199,29 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           </div>
 
           {/* Signatures Container */}
-          <div className="absolute bottom-28 w-full px-24 flex justify-between items-end">
+          <div className="absolute bottom-28 w-full px-24 flex justify-between items-end z-20">
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
-                {/* Simulated Signature */}
-                <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-5deg]`}>Pr. Wagner F. G.</span>
+                {settings?.signature_1_url ? (
+                  <img src={settings.signature_1_url} className="h-16 object-contain absolute bottom-1" alt="Signature 1" crossOrigin="anonymous" />
+                ) : (
+                  <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-5deg]`}>{settings?.signature_1_name || 'Pr. Wagner F. G.'}</span>
+                )}
               </div>
-              <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">Pr. Wagner F. G. da Silva</p>
-              <p className="text-xs text-slate-500">Presidente</p>
+              <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">{settings?.signature_1_name || 'Pr. Wagner F. G. da Silva'}</p>
+              <p className="text-xs text-slate-500">{settings?.signature_1_role || 'Presidente'}</p>
             </div>
 
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
-                {/* Simulated Signature */}
-                <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-10deg]`}>Pr. Marcelo Ribeiro</span>
+                {settings?.signature_2_url ? (
+                  <img src={settings.signature_2_url} className="h-16 object-contain absolute bottom-1" alt="Signature 2" crossOrigin="anonymous" />
+                ) : (
+                  <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-10deg]`}>{settings?.signature_2_name || 'Pr. Marcelo Ribeiro'}</span>
+                )}
               </div>
-              <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">Pr. Marcelo da Silva Ribeiro</p>
-              <p className="text-xs text-slate-500">Diretor</p>
+              <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">{settings?.signature_2_name || 'Pr. Marcelo da Silva Ribeiro'}</p>
+              <p className="text-xs text-slate-500">{settings?.signature_2_role || 'Diretor'}</p>
             </div>
 
             <div className="flex flex-col items-center w-64">

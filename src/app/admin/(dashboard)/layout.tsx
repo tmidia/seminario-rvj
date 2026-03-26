@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 import Link from "next/link"
-import { BookOpen, Users, LayoutDashboard, LogOut } from "lucide-react"
+import { BookOpen, Users, LayoutDashboard, LogOut, Award } from "lucide-react"
 
 import { MobileNav } from "./MobileNav"
 
@@ -43,6 +43,10 @@ export default function AdminDashboardLayout({ children }: { children: ReactNode
           <Link href="/admin/usuarios" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
             <Users size={20} className="text-[#c29a4b]" />
             <span className="font-medium text-slate-100">Professores</span>
+          </Link>
+          <Link href="/admin/certificado" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
+            <Award size={20} className="text-[#c29a4b]" />
+            <span className="font-medium text-slate-100">Certificados</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-white/10 bg-[#072a1e]">

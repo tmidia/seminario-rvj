@@ -62,6 +62,8 @@ export default async function CertificateServerPage({ params }: { params: { cour
     ? lastCompletionDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
 
+  const { data: settings } = await supabase.from('certificate_settings').select('*').single()
+
   return (
     <CertificateClient 
       studentName={profile.full_name}
@@ -69,6 +71,7 @@ export default async function CertificateServerPage({ params }: { params: { cour
       hours={hours}
       completionDate={formattedDate}
       subjects={subjects.map(s => ({ title: s.title }))}
+      settings={settings || {}}
     />
   )
 }
