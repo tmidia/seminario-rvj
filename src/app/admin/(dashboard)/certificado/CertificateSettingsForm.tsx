@@ -111,7 +111,8 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'logo_url')} disabled={loading} />
             </div>
-            {formData.logo_url && <Button variant="link" className="text-xs text-red-500 p-0" onClick={() => setFormData(p => ({...p, logo_url: ''}))}>Remover Logo</Button>}
+            <p className="text-xs text-slate-500 mt-1">Dica: Use PNG transparente com formato quadrado ou levemente retangular (Ex: 300x300px).</p>
+            {formData.logo_url && <Button variant="link" className="text-xs text-red-500 p-0 mt-1" onClick={() => setFormData(p => ({...p, logo_url: ''}))}>Remover Logo</Button>}
           </div>
 
           <div className="space-y-2">
@@ -122,6 +123,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'signature_1_url')} disabled={loading} />
             </div>
+            <p className="text-xs text-slate-500 mt-1 text-orange-600/80 font-medium">Muito Importante: Recorte a imagem bem rente à assinatura, sem deixar espaços vazios (transparentes) sobrando em volta. Sugestão: 400x150px.</p>
           </div>
 
           <div className="space-y-2">
@@ -132,6 +134,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'signature_2_url')} disabled={loading} />
             </div>
+            <p className="text-xs text-slate-500 mt-1 text-orange-600/80 font-medium">Muito Importante: Recorte a imagem bem rente à assinatura, sem deixar espaços vazios (transparentes) sobrando em volta. Sugestão: 400x150px.</p>
           </div>
           
           <div className="space-y-2">
@@ -142,6 +145,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'bg_image_url')} disabled={loading} />
             </div>
+            <p className="text-xs text-slate-500 mt-1">Dica: Use uma imagem grande no formato Paisagem/A4 Deitada (Ex: 3508x2480px). A opacidade (transparência) é aplicada automaticamente.</p>
           </div>
         </CardContent>
       </Card>

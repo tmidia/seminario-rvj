@@ -212,9 +212,9 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           {/* Signatures Container */}
           <div className="absolute bottom-28 w-full px-24 flex justify-between items-end z-20">
             <div className="flex flex-col items-center w-64">
-              <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
+              <div className="w-full border-b border-slate-800 h-24 relative flex justify-center items-end pb-1">
                 {settings?.signature_1_url ? (
-                  <img src={settings.signature_1_url} className="h-16 object-contain absolute bottom-1" alt="Signature 1" crossOrigin="anonymous" />
+                  <img src={settings.signature_1_url} className="h-24 object-contain absolute bottom-1 scale-125 origin-bottom" alt="Signature 1" crossOrigin="anonymous" />
                 ) : (
                   <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-5deg]`}>{settings?.signature_1_name || 'Pr. Wagner F. G.'}</span>
                 )}
@@ -224,9 +224,9 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             </div>
 
             <div className="flex flex-col items-center w-64">
-              <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
+              <div className="w-full border-b border-slate-800 h-24 relative flex justify-center items-end pb-1">
                 {settings?.signature_2_url ? (
-                  <img src={settings.signature_2_url} className="h-16 object-contain absolute bottom-1" alt="Signature 2" crossOrigin="anonymous" />
+                  <img src={settings.signature_2_url} className="h-24 object-contain absolute bottom-1 scale-125 origin-bottom" alt="Signature 2" crossOrigin="anonymous" />
                 ) : (
                   <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-10deg]`}>{settings?.signature_2_name || 'Pr. Marcelo Ribeiro'}</span>
                 )}
@@ -236,7 +236,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             </div>
 
             <div className="flex flex-col items-center w-64">
-              <div className="w-full border-b border-slate-800 h-16 relative flex justify-center items-end pb-1">
+              <div className="w-full border-b border-slate-800 h-24 relative flex justify-center items-end pb-1">
               </div>
               <p className="mt-2 text-sm font-bold text-slate-800 uppercase text-center">Aluno(a)</p>
             </div>
