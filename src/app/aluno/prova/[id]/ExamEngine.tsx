@@ -124,24 +124,38 @@ export default function ExamEngine({ attempt, exam, questions }: { attempt: Reco
                 <div className="font-medium mt-2 text-slate-800 text-lg" dangerouslySetInnerHTML={{ __html: q.text }}></div>
               </div>
               <div className="p-4 space-y-2">
-                {Object.entries(q.options).map(([key, value]) => {
-                   const isSelected = answers[q.id.toString()] === key
-                   return (
-                     <label key={key} className={`flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-blue-50 border-blue-400 shadow-sm ring-1 ring-blue-300' : 'bg-white hover:bg-slate-50 border-slate-200'}`}>
-                       <input 
-                         type="radio" 
-                         name={`q_${q.id}`} 
-                         value={key} 
-                         checked={isSelected}
-                         onChange={() => handleSelect(q.id.toString(), key)}
-                         className="mt-1 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                       />
-                       <span className={`text-sm ${isSelected ? 'text-blue-900 font-medium' : 'text-slate-700'}`}>
-                         <strong className="mr-2 text-blue-900/50">{key})</strong> {value as string}
-                       </span>
-                     </label>
-                   )
-                })}
+                {(() => {
+                  let normalizedOptions = q.options;
+                  if (Array.isArray(q.options)) {
+                    normalizedOptions = {
+                      A: q.options[0],
+                      B: q.options[1],
+                      C: q.options[2],
+                      D: q.options[3]
+                    };
+                  }
+                  
+                  return Object.entries(normalizedOptions).map(([key, value]) => {
+                     const isSelected = answers[q.id.toString()] === key
+                     if (!value) return null; // Skip empty options
+                     
+                     return (
+                       <label key={key} className={`flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all ${isSelected ? 'bg-blue-50 border-blue-400 shadow-sm ring-1 ring-blue-300' : 'bg-white hover:bg-slate-50 border-slate-200'}`}>
+                         <input 
+                           type="radio" 
+                           name={`q_${q.id}`} 
+                           value={key} 
+                           checked={isSelected}
+                           onChange={() => handleSelect(q.id.toString(), key)}
+                           className="mt-1 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                         />
+                         <span className={`text-sm ${isSelected ? 'text-blue-900 font-medium' : 'text-slate-700'}`}>
+                           <strong className="mr-2 text-blue-900/50">{key})</strong> {value as string}
+                         </span>
+                       </label>
+                     )
+                  })
+                })()}
               </div>
             </CardContent>
           </Card>
