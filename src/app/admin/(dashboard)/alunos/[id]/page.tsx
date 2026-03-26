@@ -1,14 +1,16 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2, Clock, XCircle, Award } from "lucide-react"
 
 export default async function AdminStudentDetailsPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  // Use admin client to bypass RLS since this is a protected admin route
+  const adminSupabase = createAdminClient()
   
   // 1. Fetch Student Profile
-  const { data: student } = await supabase
+  const { data: student } = await adminSupabase
     .from("profiles")
     .select("*, enrollments(courses(*))")
     .eq("id", params.id)
@@ -17,7 +19,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
   if (!student) return notFound()
 
   // 2. Fetch Exam Attempts
-  const { data: attempts } = await supabase
+  const { data: attempts } = await adminSupabase
     .from("exam_attempts")
     .select("*, exams(title, subject_id, subjects(title))")
     .eq("user_id", params.id)
