@@ -20,7 +20,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
   const { data: attempts } = await supabase
     .from("exam_attempts")
     .select("*, exams(title, subject_id, subjects(name))")
-    .eq("student_id", params.id)
+    .eq("user_id", params.id)
     .order("created_at", { ascending: false })
 
   // 3. Fetch Certificate Status
