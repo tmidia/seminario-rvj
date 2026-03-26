@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Users, FileText, CheckCircle, GraduationCap, Activity, Award } from "lucide-react"
+import { Users, FileText, GraduationCap, Activity, Award } from "lucide-react"
 import { createClient } from "@/utils/supabase/server"
 import Link from "next/link"
 
