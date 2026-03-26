@@ -24,14 +24,12 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
     .order("created_at", { ascending: false })
 
   // 3. Fetch Certificate Status
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const studentCourses = student.enrollments?.map((e: any) => e.courses?.id) || []
   let certificateCourseId = null
-  let isGraduated = false
   
   if (studentCourses.length > 0) {
     certificateCourseId = studentCourses[0]
-    // Quick check if all exams are passed (basic logic, can be expanded)
-    // Actually, let's just show a direct admin link to view the PDF if they want
   }
 
   return (
@@ -62,7 +60,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
               <p className="text-slate-500 font-medium">Cursos Matriculados</p>
               <ul className="mt-1 list-disc pl-5">
                 {student.enrollments?.length ? (
-                  student.enrollments.map((e: any) => <li key={e.courses.id} className="font-semibold text-slate-800">{e.courses.title}</li>)
+                  student.enrollments.map((e: { courses: { id: number, title: string } }) => <li key={e.courses.id} className="font-semibold text-slate-800">{e.courses.title}</li>)
                 ) : (
                   <li className="text-slate-400">Nenhum curso</li>
                 )}
