@@ -158,7 +158,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             </h3>
 
             <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
-              concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD),<br/>com carga horária de {hours} horas.
+              concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD), com carga horária de {hours} horas.
             </p>
           </div>
 
