@@ -19,7 +19,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
   // 2. Fetch Exam Attempts
   const { data: attempts } = await supabase
     .from("exam_attempts")
-    .select("*, exams(title, subject_id, subjects(name))")
+    .select("*, exams(title, subject_id, subjects(title))")
     .eq("user_id", params.id)
     .order("created_at", { ascending: false })
 
