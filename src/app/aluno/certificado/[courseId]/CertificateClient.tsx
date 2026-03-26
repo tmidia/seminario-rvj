@@ -18,7 +18,18 @@ interface CertificateProps {
   hours: number;
   completionDate: string;
   subjects: Subject[];
-  settings?: any;
+  settings?: {
+    bg_image_url?: string;
+    logo_url?: string;
+    layout_scale?: number;
+    margin_top?: number;
+    signature_1_url?: string;
+    signature_1_name?: string;
+    signature_1_role?: string;
+    signature_2_url?: string;
+    signature_2_name?: string;
+    signature_2_role?: string;
+  };
 }
 
 export function CertificateClient({ studentName, courseTitle, hours, completionDate, subjects, settings }: CertificateProps) {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/utils/supabase/client"
-import { Save, UploadCloud, Loader2, Image as ImageIcon } from "lucide-react"
+import { Save, Loader2, Image as ImageIcon } from "lucide-react"
 
 interface Settings {
   id?: string;
@@ -46,7 +46,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `${field}_${Date.now()}.${fileExt}`
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('certificates')
         .upload(fileName, file, { upsert: true })
 
@@ -135,7 +135,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
           </div>
           
           <div className="space-y-2">
-            <Label>Imagem de Fundo - Marca D'água (Opcional)</Label>
+            <Label>Imagem de Fundo - Marca D&apos;água (Opcional)</Label>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
                 {formData.bg_image_url ? <img src={formData.bg_image_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
