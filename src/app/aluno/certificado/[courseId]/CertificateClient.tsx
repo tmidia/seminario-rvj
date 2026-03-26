@@ -87,7 +87,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-center items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
-            <img src={settings.bg_image_url} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
+            <img src={settings.bg_image_url} alt="Background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
           )}
           
           {/* Inner Golden Border */}
@@ -171,7 +171,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         <div ref={backRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
-            <img src={settings.bg_image_url} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
+            <img src={settings.bg_image_url} alt="Background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
           )}
 
           {/* Inner Golden Border */}
