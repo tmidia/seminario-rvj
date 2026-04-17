@@ -70,7 +70,9 @@ export default async function AlunosPage() {
                 {alunos?.map((aluno) => (
                   <tr key={aluno.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-4 py-3 font-semibold text-slate-800">{aluno.full_name}</td>
-                    <td className="px-4 py-3 font-mono text-slate-600">{aluno.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</td>
+                    <td className="px-4 py-3 font-mono text-slate-600">
+                      {aluno.cpf ? aluno.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : '---'}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">
                       {aluno.enrollments && aluno.enrollments.length > 0 
                         ? aluno.enrollments.map((e) => e.courses?.title).join(", ") 
@@ -81,7 +83,9 @@ export default async function AlunosPage() {
                         {aluno.status || 'ativo'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-500">{new Date(aluno.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td className="px-4 py-3 text-slate-500">
+                      {aluno.created_at ? new Date(aluno.created_at).toLocaleDateString('pt-BR') : '---'}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link href={`/admin/alunos/${aluno.id}`} className="inline-flex items-center justify-center p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 transition-colors" title="Ver Histórico">

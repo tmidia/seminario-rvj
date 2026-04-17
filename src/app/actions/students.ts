@@ -6,69 +6,76 @@ import { createAdminClient } from "@/utils/supabase/admin"
 import { isValidCPF } from "@/utils/cpf"
 
 export async function createStudent(data: FormData) {
-  const reqClient = createServerClient()
-  const { data: adminData } = await reqClient.auth.getUser()
+  try {
+    const reqClient = createServerClient()
+    const { data: adminData } = await reqClient.auth.getUser()
 
-  if (!adminData?.user) throw new Error("Não autorizado")
+    if (!adminData?.user) throw new Error("Não autorizado")
 
-  const rawCpf = data.get("cpf") as string
-  const cpf = rawCpf.replace(/\D/g, '')
+    const rawCpf = data.get("cpf") as string
+    const cpf = rawCpf.replace(/\D/g, '')
 
-  if (!isValidCPF(cpf)) throw new Error("CPF Inválido. Verifique os números digitados.")
-  const fullName = data.get("full_name") as string
-  const courseIds = data.getAll("course_ids").map(id => parseInt(id as string))
+    if (!isValidCPF(cpf)) throw new Error("CPF Inválido. Verifique os números digitados.")
+    const fullName = data.get("full_name") as string
+    const courseIds = data.getAll("course_ids").map(id => parseInt(id as string))
 
-  if (courseIds.length === 0) throw new Error("Selecione pelo menos um curso")
+    if (courseIds.length === 0) throw new Error("Selecione pelo menos um curso")
 
-  const adminSupabase = createAdminClient()
+    const adminSupabase = createAdminClient()
 
-  // 1. Cria o usuário no Auth usando a API Oficial (evita erro 500)
-  const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
-    email: `${cpf}.rvj@gmail.com`,
-    password: `Rvj@${cpf}`,
-    email_confirm: true,
-    user_metadata: { full_name: fullName }
-  })
-
-  if (authError && authError.message !== 'User already exists') {
-    throw new Error(`Erro ao criar acesso: ${authError.message}`)
-  }
-
-  // Se o usuário já existia, buscamos o ID dele
-  let userId = authUser?.user?.id
-  if (!userId && authError?.message === 'User already exists') {
-    const { data: existingUser } = await adminSupabase.auth.admin.listUsers()
-    userId = existingUser.users.find(u => u.email === `${cpf}.rvj@gmail.com`)?.id
-  }
-
-  if (!userId) throw new Error("Não foi possível identificar o ID do usuário.")
-
-  // 2. Atualiza o Perfil na tabela pública
-  const { error: profileError } = await adminSupabase
-    .from("profiles")
-    .upsert({
-      id: userId,
-      full_name: fullName,
-      cpf: cpf,
-      role: 'aluno',
-      status: 'ativo'
+    // 1. Cria o usuário no Auth usando a API Oficial (evita erro 500)
+    const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
+      email: `${cpf}.rvj@gmail.com`,
+      password: `Rvj@${cpf}`,
+      email_confirm: true,
+      user_metadata: { full_name: fullName }
     })
 
-  if (profileError) throw new Error(`Erro no perfil: ${profileError.message}`)
+    if (authError && authError.message !== 'User already exists') {
+      throw new Error(`Erro ao criar acesso: ${authError.message}`)
+    }
 
-  // 3. Gerencia as matrículas
-  await adminSupabase.from("enrollments").delete().eq("profile_id", userId)
-  
-  if (courseIds && courseIds.length > 0) {
-    const enrollments = courseIds.map(courseId => ({
-      profile_id: userId,
-      course_id: courseId
-    }))
-    const { error: enrollError } = await adminSupabase.from("enrollments").insert(enrollments)
-    if (enrollError) throw new Error(`Erro na matrícula: ${enrollError.message}`)
+    // Se o usuário já existia, buscamos o ID dele
+    let userId = authUser?.user?.id
+    if (!userId && authError?.message === 'User already exists') {
+      const { data: userData, error: listError } = await adminSupabase.auth.admin.listUsers()
+      if (listError) throw new Error(`Erro ao buscar usuário existente: ${listError.message}`)
+      userId = userData?.users?.find(u => u.email === `${cpf}.rvj@gmail.com`)?.id
+    }
+
+    if (!userId) throw new Error("Não foi possível identificar o ID do usuário.")
+
+    // 2. Atualiza o Perfil na tabela pública
+    const { error: profileError } = await adminSupabase
+      .from("profiles")
+      .upsert({
+        id: userId,
+        full_name: fullName,
+        cpf: cpf,
+        role: 'aluno',
+        status: 'ativo'
+      })
+
+    if (profileError) throw new Error(`Erro no perfil: ${profileError.message}`)
+
+    // 3. Gerencia as matrículas
+    await adminSupabase.from("enrollments").delete().eq("profile_id", userId)
+    
+    if (courseIds && courseIds.length > 0) {
+      const enrollments = courseIds.map(courseId => ({
+        profile_id: userId,
+        course_id: courseId
+      }))
+      const { error: enrollError } = await adminSupabase.from("enrollments").insert(enrollments)
+      if (enrollError) throw new Error(`Erro na matrícula: ${enrollError.message}`)
+    }
+
+    revalidatePath("/admin/alunos")
+    return { success: true }
+  } catch (err: unknown) {
+    console.error("Create Student Error:", err)
+    return { error: err instanceof Error ? err.message : "Erro crítico interno" }
   }
-
-  revalidatePath("/admin/alunos")
 }
 
 
@@ -96,52 +103,58 @@ export async function updateStudentStatus(userId: string, currentStatus: string)
 }
 
 export async function updateStudent(userId: string, data: FormData) {
-  const supabase = createServerClient()
-  const { data: adminData } = await supabase.auth.getUser()
-  if (!adminData?.user) throw new Error("Não autorizado")
+  try {
+    const supabase = createServerClient()
+    const { data: adminData } = await supabase.auth.getUser()
+    if (!adminData?.user) throw new Error("Não autorizado")
 
-  const rawCpf = data.get("cpf") as string
-  const cpf = rawCpf.replace(/\D/g, '')
+    const rawCpf = data.get("cpf") as string
+    const cpf = rawCpf.replace(/\D/g, '')
 
-  if (!isValidCPF(cpf)) throw new Error("CPF Inválido. Verifique os números digitados.")
-  const fullName = data.get("full_name") as string
-  const email = data.get("email") as string
-  const courseIds = data.getAll("course_ids").map(id => parseInt(id as string))
+    if (!isValidCPF(cpf)) throw new Error("CPF Inválido. Verifique os números digitados.")
+    const fullName = data.get("full_name") as string
+    const email = data.get("email") as string
+    const courseIds = data.getAll("course_ids").map(id => parseInt(id as string))
 
-  if (courseIds.length === 0) throw new Error("Selecione pelo menos um curso")
+    if (courseIds.length === 0) throw new Error("Selecione pelo menos um curso")
 
-  const adminClient = createAdminClient()
+    const adminClient = createAdminClient()
 
-  // 1. Update Auth User if email is provided
-  if (email && email.trim() !== '') {
-    const { error: authError } = await adminClient.auth.admin.updateUserById(userId, {
-      email,
-      user_metadata: { full_name: fullName }
-    })
-    if (authError) throw new Error("Erro ao atualizar dados de autenticação: " + authError.message)
+    // 1. Update Auth User if email is provided
+    if (email && email.trim() !== '') {
+      const { error: authError } = await adminClient.auth.admin.updateUserById(userId, {
+        email,
+        user_metadata: { full_name: fullName }
+      })
+      if (authError) throw new Error("Erro ao atualizar dados de autenticação: " + authError.message)
+    }
+
+    // 2. Update Profile
+    const { error: profileError } = await adminClient
+      .from('profiles')
+      .update({ cpf, full_name: fullName })
+      .eq('id', userId)
+
+    if (profileError) throw new Error("Erro ao atualizar perfil do aluno.")
+
+    // 3. Re-enroll
+    // Clear old
+    await adminClient.from('enrollments').delete().eq('profile_id', userId)
+    // Insert new
+    const newEnrollments = courseIds.map(cid => ({
+      profile_id: userId,
+      course_id: cid
+    }))
+    const { error: enrollError } = await adminClient.from('enrollments').insert(newEnrollments)
+
+    if (enrollError) throw new Error("Erro ao atualizar matrículas do aluno.")
+
+    revalidatePath("/admin/alunos")
+    return { success: true }
+  } catch (err: unknown) {
+    console.error("Update Student Error:", err)
+    return { error: err instanceof Error ? err.message : "Erro crítico interno" }
   }
-
-  // 2. Update Profile
-  const { error: profileError } = await adminClient
-    .from('profiles')
-    .update({ cpf, full_name: fullName })
-    .eq('id', userId)
-
-  if (profileError) throw new Error("Erro ao atualizar perfil do aluno.")
-
-  // 3. Re-enroll
-  // Clear old
-  await adminClient.from('enrollments').delete().eq('profile_id', userId)
-  // Insert new
-  const newEnrollments = courseIds.map(cid => ({
-    profile_id: userId,
-    course_id: cid
-  }))
-  const { error: enrollError } = await adminClient.from('enrollments').insert(newEnrollments)
-
-  if (enrollError) throw new Error("Erro ao atualizar matrículas do aluno.")
-
-  revalidatePath("/admin/alunos")
 }
 
 export async function approveStudentForCertificates(studentId: string) {

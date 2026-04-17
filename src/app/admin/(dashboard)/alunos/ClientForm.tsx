@@ -33,7 +33,12 @@ export function NewStudentDialog({ courses }: { courses: Course[] }) {
     }
 
     try {
-      await createStudent(formData)
+      const res = await createStudent(formData)
+      if (res?.error) {
+        setError(res.error)
+        setLoading(false)
+        return
+      }
       setOpen(false)
       router.refresh()
     } catch (e: unknown) {
@@ -104,7 +109,12 @@ export function EditStudentDialog({ student, courses }: { student: Student, cour
 
     const formData = new FormData(e.currentTarget)
     try {
-      await updateStudent(student.id, formData)
+      const res = await updateStudent(student.id, formData)
+      if (res?.error) {
+        setError(res.error)
+        setLoading(false)
+        return
+      }
       setOpen(false)
       router.refresh()
     } catch (err: unknown) {
