@@ -58,11 +58,11 @@ export async function createStudent(data: FormData) {
   if (profileError) throw new Error(`Erro no perfil: ${profileError.message}`)
 
   // 3. Gerencia as matrículas
-  await adminSupabase.from("enrollments").delete().eq("student_id", userId)
+  await adminSupabase.from("enrollments").delete().eq("profile_id", userId)
   
   if (courseIds && courseIds.length > 0) {
     const enrollments = courseIds.map(courseId => ({
-      student_id: userId,
+      profile_id: userId,
       course_id: courseId
     }))
     const { error: enrollError } = await adminSupabase.from("enrollments").insert(enrollments)
@@ -132,10 +132,10 @@ export async function updateStudent(userId: string, data: FormData) {
 
   // 3. Re-enroll
   // Clear old
-  await adminClient.from('enrollments').delete().eq('student_id', userId)
+  await adminClient.from('enrollments').delete().eq('profile_id', userId)
   // Insert new
   const newEnrollments = courseIds.map(cid => ({
-    student_id: userId,
+    profile_id: userId,
     course_id: cid
   }))
   const { error: enrollError } = await adminClient.from('enrollments').insert(newEnrollments)
