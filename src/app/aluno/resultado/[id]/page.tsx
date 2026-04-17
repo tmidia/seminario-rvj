@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -6,12 +7,14 @@ import { CheckCircle2, XCircle, ArrowLeft } from "lucide-react"
 
 export default async function ResultadoPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
   
-  const { data: attempt } = await supabase
+  const { data: attempt } = await adminSupabase
     .from('exam_attempts')
     .select('*, exams(title, subjects(title))')
     .eq('id', params.id)
     .single()
+
 
   if (!attempt || attempt.status !== 'completed') {
     return <div className="p-8 text-center text-red-500">Resultado não disponível.</div>

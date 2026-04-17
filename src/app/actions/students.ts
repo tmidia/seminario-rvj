@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import { createClient as createServerClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { isValidCPF } from "@/utils/cpf"
 
 export async function createStudent(data: FormData) {
-  const adminSupabase = createServerClient()
-  const { data: adminData } = await adminSupabase.auth.getUser()
+  const reqClient = createServerClient()
+  const { data: adminData } = await reqClient.auth.getUser()
 
   if (!adminData?.user) throw new Error("Não autorizado")
 
@@ -19,22 +20,58 @@ export async function createStudent(data: FormData) {
 
   if (courseIds.length === 0) throw new Error("Selecione pelo menos um curso")
 
-  // Use the native Postgres RPC to create the student and bypass Supabase Auth API Rate Limits (email rate limit)
-  const { error: rpcError } = await adminSupabase.rpc('admin_create_student', {
-    p_cpf: cpf,
-    p_full_name: fullName,
-    p_course_ids: courseIds
+  const adminSupabase = createAdminClient()
+
+  // 1. Cria o usuário no Auth usando a API Oficial (evita erro 500)
+  const { data: authUser, error: authError } = await adminSupabase.auth.admin.createUser({
+    email: `${cpf}.rvj@gmail.com`,
+    password: `Rvj@${cpf}`,
+    email_confirm: true,
+    user_metadata: { full_name: fullName }
   })
 
-  // The RPC function will safely insert or update the profile and remap the course_ids
-  if (rpcError) {
-    throw new Error(rpcError.message)
+  if (authError && authError.message !== 'User already exists') {
+    throw new Error(`Erro ao criar acesso: ${authError.message}`)
+  }
+
+  // Se o usuário já existia, buscamos o ID dele
+  let userId = authUser?.user?.id
+  if (!userId && authError?.message === 'User already exists') {
+    const { data: existingUser } = await adminSupabase.auth.admin.listUsers()
+    userId = existingUser.users.find(u => u.email === `${cpf}.rvj@gmail.com`)?.id
+  }
+
+  if (!userId) throw new Error("Não foi possível identificar o ID do usuário.")
+
+  // 2. Atualiza o Perfil na tabela pública
+  const { error: profileError } = await adminSupabase
+    .from("profiles")
+    .upsert({
+      id: userId,
+      full_name: fullName,
+      cpf: cpf,
+      email: `${cpf}.rvj@gmail.com`,
+      role: 'aluno',
+      status: 'ativo'
+    })
+
+  if (profileError) throw new Error(`Erro no perfil: ${profileError.message}`)
+
+  // 3. Gerencia as matrículas
+  await adminSupabase.from("enrollments").delete().eq("student_id", userId)
+  
+  if (courseIds && courseIds.length > 0) {
+    const enrollments = courseIds.map(courseId => ({
+      student_id: userId,
+      course_id: courseId
+    }))
+    const { error: enrollError } = await adminSupabase.from("enrollments").insert(enrollments)
+    if (enrollError) throw new Error(`Erro na matrícula: ${enrollError.message}`)
   }
 
   revalidatePath("/admin/alunos")
 }
 
-import { createAdminClient } from "@/utils/supabase/admin"
 
 export async function updateStudentStatus(userId: string, currentStatus: string) {
   const adminSupabase = createServerClient()
@@ -110,9 +147,11 @@ export async function updateStudent(userId: string, data: FormData) {
 
 export async function approveStudentForCertificates(studentId: string) {
   try {
-    const adminSupabase = createServerClient()
-    const { data: adminData } = await adminSupabase.auth.getUser()
+    const supabase = createServerClient()
+    const { data: adminData } = await supabase.auth.getUser()
     if (!adminData?.user) return { error: "Não autorizado" }
+
+    const adminSupabase = createAdminClient()
 
     const { data: profile, error: profileErr } = await adminSupabase.from('profiles').select('enrollments(course_id)').eq('id', studentId).single()
     

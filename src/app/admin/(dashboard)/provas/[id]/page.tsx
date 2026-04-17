@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { addQuestion, deleteQuestion } from "@/app/actions/exams"
+import { deleteQuestion } from "@/app/actions/exams"
+import { AddQuestionForm } from "./AddQuestionForm"
 import { ArrowLeft, Trash2 } from "lucide-react"
 
 export default async function QuestoesPage({ params }: { params: { id: string } }) {
@@ -33,44 +34,7 @@ export default async function QuestoesPage({ params }: { params: { id: string } 
             <CardTitle>Adicionar Questão</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={addQuestion} className="space-y-4">
-              <input type="hidden" name="exam_id" value={exam.id} />
-              <div className="space-y-2">
-                <Label htmlFor="text">Enunciado</Label>
-                <textarea id="text" name="text" required className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background min-h-[100px]" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Alternativa A</Label>
-                <Input name="optA" required />
-              </div>
-              <div className="space-y-2">
-                <Label>Alternativa B</Label>
-                <Input name="optB" required />
-              </div>
-              <div className="space-y-2">
-                <Label>Alternativa C</Label>
-                <Input name="optC" required />
-              </div>
-              <div className="space-y-2">
-                <Label>Alternativa D</Label>
-                <Input name="optD" required />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="correct_option">Alternativa Correta</Label>
-                <select id="correct_option" name="correct_option" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </select>
-              </div>
-
-              <Button type="submit" className="w-full bg-[#0a3a2a] hover:bg-[#0a3a2a]/90 text-[#c29a4b]">
-                Adicionar Questão
-              </Button>
-            </form>
+            <AddQuestionForm examId={exam.id} />
           </CardContent>
         </Card>
 

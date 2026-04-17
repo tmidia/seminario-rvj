@@ -32,6 +32,10 @@ export default function AdminDashboardLayout({ children }: { children: ReactNode
             <Users size={20} className="text-[#c29a4b]" />
             <span className="font-medium text-slate-100">Alunos</span>
           </Link>
+          <Link href="/admin/cursos" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
+            <Award size={20} className="text-[#c29a4b]" />
+            <span className="font-medium text-slate-100">Cursos</span>
+          </Link>
           <Link href="/admin/materias" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-white/10 transition-colors">
             <BookOpen size={20} className="text-[#c29a4b]" />
             <span className="font-medium text-slate-100">Matérias</span>

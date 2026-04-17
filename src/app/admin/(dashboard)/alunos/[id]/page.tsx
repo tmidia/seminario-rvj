@@ -1,9 +1,10 @@
-import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2, Clock, XCircle, Award } from "lucide-react"
+
+export const dynamic = "force-dynamic"
 
 export default async function AdminStudentDetailsPage({ params }: { params: { id: string } }) {
   // Use admin client to bypass RLS since this is a protected admin route
@@ -18,12 +19,24 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
 
   if (!student) return notFound()
 
-  // 2. Fetch Exam Attempts
-  const { data: attempts } = await adminSupabase
+  // 2. Fetch Exam Attempts with a more direct join
+  const { data: attempts, error: attemptsError } = await adminSupabase
     .from("exam_attempts")
-    .select("*, exams(title, subject_id, subjects(title))")
+    .select(`
+      *,
+      exams:exam_id (
+        title,
+        subject:subject_id (
+          title
+        )
+      )
+    `)
     .eq("user_id", params.id)
     .order("created_at", { ascending: false })
+
+  if (attemptsError) {
+    console.error("Erro ao buscar histórico:", attemptsError)
+  }
 
   // 3. Fetch Certificate Status
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

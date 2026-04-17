@@ -1,19 +1,21 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Award, Lock } from "lucide-react"
 import Link from "next/link"
 
 export default async function HistoricoPage() {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  const { data: profile } = await supabase
+  const { data: profile } = await adminSupabase
     .from('profiles')
     .select('*, enrollments(courses(id, title, subjects(id)))')
     .eq('id', user?.id)
     .single()
 
-  const { data: attempts } = await supabase
+  const { data: attempts } = await adminSupabase
     .from('exam_attempts')
     .select('*, exams(subject_id, title, subjects(title))')
     .eq('user_id', user?.id)

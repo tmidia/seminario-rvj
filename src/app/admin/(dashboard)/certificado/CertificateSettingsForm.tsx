@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/utils/supabase/client"
 import { Save, Loader2, Image as ImageIcon } from "lucide-react"
+import { uploadCertificateAsset } from "@/app/actions/upload-certificate-asset"
+import { updateCertificateSettings } from "@/app/actions/update-certificate-settings"
 
 interface Settings {
   id?: string;
@@ -46,19 +48,17 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
 
     setLoading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${field}_${Date.now()}.${fileExt}`
-      const { error: uploadError } = await supabase.storage
-        .from('certificates')
-        .upload(fileName, file, { upsert: true })
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('field', field)
 
-      if (uploadError) throw uploadError
+      const res = await uploadCertificateAsset(uploadFormData)
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('certificates')
-        .getPublicUrl(fileName)
+      if (res.error) {
+        throw new Error(res.error)
+      }
 
-      setFormData(prev => ({ ...prev, [field]: publicUrl }))
+      setFormData(prev => ({ ...prev, [field]: res.url }))
     } catch (err) {
       console.error(err)
       alert("Erro ao enviar imagem.")
@@ -70,28 +70,13 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
   const handleSave = async () => {
     setLoading(true)
     try {
-      const { error } = await supabase
-        .from('certificate_settings')
-        .update({
-          signature_1_name: formData.signature_1_name,
-          signature_1_role: formData.signature_1_role,
-          signature_2_name: formData.signature_2_name,
-          signature_2_role: formData.signature_2_role,
-          layout_scale: formData.layout_scale,
-          margin_top: formData.margin_top,
-          logo_url: formData.logo_url,
-          seal_url: formData.seal_url,
-          signature_1_url: formData.signature_1_url,
-          signature_2_url: formData.signature_2_url,
-          bg_image_url: formData.bg_image_url,
-        })
-        .eq('id', '00000000-0000-0000-0000-000000000000')
+      const res = await updateCertificateSettings(formData)
 
-      if (error) throw error
+      if (res.error) throw new Error(res.error)
       alert("Configurações salvas com sucesso!")
     } catch (err) {
       console.error(err)
-      alert("Erro ao salvar configurações no banco.")
+      alert(err instanceof Error ? err.message : "Erro ao salvar configurações no banco.")
     } finally {
       setLoading(false)
     }
@@ -110,7 +95,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             <Label>Logo do Certificado (Meio-Topo)</Label>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
-                {formData.logo_url ? <img src={formData.logo_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+                {formData.logo_url ? <img src={formData.logo_url} className="w-full object-contain" alt="Logo" /> : <ImageIcon className="text-slate-300" />}
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'logo_url')} disabled={loading} />
             </div>
@@ -122,7 +107,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             <Label>Selo de Autenticidade (Canto Inferior Direito)</Label>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
-                {formData.seal_url ? <img src={formData.seal_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+                {formData.seal_url ? <img src={formData.seal_url} className="w-full object-contain" alt="Selo" /> : <ImageIcon className="text-slate-300" />}
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'seal_url')} disabled={loading} />
             </div>
@@ -134,7 +119,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             <Label>Assinatura 1 (Esquerda)</Label>
             <div className="flex items-center gap-4">
               <div className="w-24 h-12 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
-                {formData.signature_1_url ? <img src={formData.signature_1_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+                {formData.signature_1_url ? <img src={formData.signature_1_url} className="w-full object-contain" alt="Assinatura 1" /> : <ImageIcon className="text-slate-300" />}
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'signature_1_url')} disabled={loading} />
             </div>
@@ -145,7 +130,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             <Label>Assinatura 2 (Direita)</Label>
             <div className="flex items-center gap-4">
               <div className="w-24 h-12 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
-                {formData.signature_2_url ? <img src={formData.signature_2_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+                {formData.signature_2_url ? <img src={formData.signature_2_url} className="w-full object-contain" alt="Assinatura 2" /> : <ImageIcon className="text-slate-300" />}
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'signature_2_url')} disabled={loading} />
             </div>
@@ -156,7 +141,7 @@ export function CertificateSettingsForm({ initialSettings }: { initialSettings: 
             <Label>Imagem de Fundo - Marca D&apos;água (Opcional)</Label>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-slate-100 border rounded flex items-center justify-center overflow-hidden shrink-0">
-                {formData.bg_image_url ? <img src={formData.bg_image_url} className="w-full object-contain" /> : <ImageIcon className="text-slate-300" />}
+                {formData.bg_image_url ? <img src={formData.bg_image_url} className="w-full object-contain" alt="Imagem de Fundo" /> : <ImageIcon className="text-slate-300" />}
               </div>
               <Input type="file" accept="image/*" onChange={(e) => handleUpload(e, 'bg_image_url')} disabled={loading} />
             </div>

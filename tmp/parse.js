@@ -3,7 +3,7 @@ const pdf = require('pdf-parse');
 const path = require('path');
 
 async function extractHeadings() {
-    const dir = '../apostilas/Curso Básico';
+    const dir = '../apostilas/Curso Médio';
     const files = fs.readdirSync(dir).filter(f => f.endsWith('.pdf'));
     
     let summary = '';
@@ -18,12 +18,12 @@ async function extractHeadings() {
             summary += `\n\n=== MODULE: ${file} ===\n${text}\n`;
             console.log("Processed " + file);
         } catch(e) {
-            console.error("Failed on " + file);
+            console.error("Failed on " + file, e.message);
         }
     }
     
-    fs.writeFileSync('indexes.txt', summary);
-    console.log("Written to indexes.txt");
+    fs.writeFileSync('indexes_medio.txt', summary);
+    console.log("Written to indexes_medio.txt");
 }
 
 extractHeadings();

@@ -1,25 +1,32 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Users, FileText, GraduationCap, Activity, Award } from "lucide-react"
-import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminDashboard() {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   
-  // Basic Counts
-  const { count: totalAlunos } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'aluno')
-  const { count: totalProvas } = await supabase.from('exams').select('*', { count: 'exact', head: true })
-  
-  // Attempts Stats
-  const { count: totalAttempts } = await supabase.from('exam_attempts').select('*', { count: 'exact', head: true })
-  const { count: approvedAttempts } = await supabase.from('exam_attempts').select('*', { count: 'exact', head: true }).gte('score', 7)
-  
-  // Recent Activity Log
-  const { data: recentAttempts } = await supabase
-    .from('exam_attempts')
-    .select('id, score, status, created_at, profiles(full_name, id), exams(title)')
-    .order('created_at', { ascending: false })
-    .limit(5)
+  // Fetch data in parallel to reduce TTFB
+  const [
+    { count: totalAlunos },
+    { count: totalProvas },
+    { count: totalAttempts },
+    { count: approvedAttempts },
+    { data: recentAttempts }
+  ] = await Promise.all([
+    supabase.from('profiles').select('*', { count: 'exact' }).eq('role', 'aluno'),
+    supabase.from('exams').select('id', { count: 'exact' }),
+    supabase.from('exam_attempts').select('*', { count: 'exact' }),
+    supabase.from('exam_attempts').select('*', { count: 'exact' }).gte('score', 7),
+    supabase
+      .from('exam_attempts')
+      .select('id, score, status, created_at, profiles(full_name, id), exams(title)')
+      .order('created_at', { ascending: false })
+      .limit(5)
+  ])
+
   
   return (
     <div className="space-y-8">
@@ -90,8 +97,9 @@ export default async function AdminDashboard() {
             <div className="p-8 text-center text-slate-500">Nenhuma prova foi realizada ainda pelos alunos.</div>
           ) : (
             <div className="divide-y">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {recentAttempts.map((attempt: any) => {
+              {recentAttempts?.map((attempt) => {
+                const profiles = attempt.profiles as unknown as { full_name: string, id: string }
+                const exams = attempt.exams as unknown as { title: string }
                 const isCompleted = attempt.status === 'completed'
                 const score = parseFloat(attempt.score || "0")
                 const isPassed = score >= 7.0
@@ -101,13 +109,13 @@ export default async function AdminDashboard() {
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="font-bold text-slate-800">
-                          <Link href={`/admin/alunos/${attempt.profiles?.id}`} className="hover:text-blue-600 transition-colors">
-                            {attempt.profiles?.full_name || 'Aluno Excluído'}
+                          <Link href={`/admin/alunos/${profiles?.id}`} className="hover:text-blue-600 transition-colors">
+                            {profiles?.full_name || 'Aluno Excluído'}
                           </Link>
                         </p>
                         {!isCompleted && <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-700 rounded-full">Fazendo Agora</span>}
                       </div>
-                      <p className="text-sm text-slate-600 mt-1">{attempt.exams?.title}</p>
+                      <p className="text-sm text-slate-600 mt-1">{exams?.title}</p>
                       <p className="text-xs text-slate-400 mt-1">{new Date(attempt.created_at).toLocaleString('pt-BR')}</p>
                     </div>
                     
@@ -125,6 +133,7 @@ export default async function AdminDashboard() {
                 )
               })}
             </div>
+
           )}
         </CardContent>
       </Card>

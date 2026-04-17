@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { redirect } from "next/navigation"
 import { CertificateClient } from "./CertificateClient"
 
@@ -7,22 +8,23 @@ export default async function CertificateServerPage({ params }: { params: { cour
   if (isNaN(courseId)) redirect('/aluno/historico')
 
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
   // Get Profile
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+  const { data: profile } = await adminSupabase.from('profiles').select('*').eq('id', user.id).single()
   if (!profile) redirect('/')
 
   // Get requested Course and its corresponding 12 subjects
-  const { data: course } = await supabase.from('courses').select('*').eq('id', courseId).single()
+  const { data: course } = await adminSupabase.from('courses').select('*').eq('id', courseId).single()
   if (!course) redirect('/aluno/historico')
 
-  const { data: subjects } = await supabase.from('subjects').select('*').eq('course_id', courseId).order('order_index')
+  const { data: subjects } = await adminSupabase.from('subjects').select('*').eq('course_id', courseId).order('order_index')
   if (!subjects || subjects.length === 0) redirect('/aluno/historico')
 
-  // Verify that the student has PASSED all 12 subjects (>= 7.0 score on 'completed' exams for each subject)
-  const { data: attempts } = await supabase
+  // Verify that the student has PASSED all subjects (>= 7.0 score on 'completed' exams for each subject)
+  const { data: attempts } = await adminSupabase
     .from('exam_attempts')
     .select('*, exams(subject_id)')
     .eq('user_id', user.id)
@@ -62,7 +64,7 @@ export default async function CertificateServerPage({ params }: { params: { cour
     ? lastCompletionDate.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
 
-  const { data: settings } = await supabase.from('certificate_settings').select('*').single()
+  const { data: settings } = await adminSupabase.from('certificate_settings').select('*').single()
 
   return (
     <CertificateClient 

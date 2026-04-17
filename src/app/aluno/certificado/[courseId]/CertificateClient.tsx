@@ -96,7 +96,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
       <div className="flex flex-col gap-12 text-slate-900 overflow-x-auto pb-12 items-center w-full">
         {/* --- FRONT PAGE --- */}
-        <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-center items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
+        <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-start pt-12 items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
             <img src={settings.bg_image_url} alt="Background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
@@ -158,13 +158,13 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
               {courseTitle}
             </h3>
 
-            <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[800px] text-center leading-relaxed">
+            <p className="text-lg font-medium text-slate-700 tracking-wide max-w-[700px] text-center leading-relaxed">
               concluído com sucesso em {completionDate} na modalidade de Ensino a Distância (EAD), com carga horária de {hours} horas.
             </p>
           </div>
 
           {/* Bottom Seal & Footer */}
-          <div className="absolute bottom-20 right-32 z-20">
+          <div className="absolute bottom-12 right-12 z-20">
             {settings?.seal_url ? (
               <img src={settings.seal_url} alt="Selo de Autenticidade" crossOrigin="anonymous" className="w-32 h-32 object-contain drop-shadow-md" />
             ) : (

@@ -1,4 +1,4 @@
-import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
@@ -6,11 +6,20 @@ import { Label } from "@/components/ui/label"
 import { createSubject, deleteSubject, updateSubject } from "@/app/actions/subjects"
 import { Trash2, Save } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 export default async function MateriasPage() {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   
-  const { data: courses } = await supabase.from("courses").select("*").order("id")
-  const { data: subjects } = await supabase.from("subjects").select("*, courses(title)").order("course_id").order("order_index")
+  // Fetch courses and subjects in parallel
+  const [
+    { data: courses },
+    { data: subjects }
+  ] = await Promise.all([
+    supabase.from("courses").select("*").order("id"),
+    supabase.from("subjects").select("*, courses(title)").order("course_id").order("order_index")
+  ])
+
 
   return (
     <div className="space-y-6">

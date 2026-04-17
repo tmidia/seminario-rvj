@@ -1,20 +1,25 @@
-import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { createExam, toggleExamStatus } from "@/app/actions/exams"
+import { CreateExamForm } from "./CreateExamForm"
+import { toggleExamStatus } from "@/app/actions/exams"
+
+export const dynamic = "force-dynamic"
 
 export default async function ProvasPage() {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   
-  const { data: subjects } = await supabase.from("subjects").select("*, courses(title)").order("course_id")
-  
-  const { data: exams } = await supabase
-    .from("exams")
-    .select("*, subjects(title, courses(title))")
-    .order("id", { ascending: false })
+  // Fetch subjects and exams in parallel
+  const [
+    { data: subjects },
+    { data: exams }
+  ] = await Promise.all([
+    supabase.from("subjects").select("*, courses(title)").order("course_id"),
+    supabase.from("exams").select("*, subjects(*)").order("id", { ascending: false })
+  ])
 
   return (
     <div className="space-y-6">
@@ -28,28 +33,7 @@ export default async function ProvasPage() {
             <CardTitle>Criar Nova Prova</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={createExam} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título da Prova</Label>
-                <Input id="title" name="title" required placeholder="Ex: Avaliação 01" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="subject_id">Matéria</Label>
-                <select id="subject_id" name="subject_id" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                  <option value="">Selecione...</option>
-                  {subjects?.map(s => (
-                    <option key={s.id} value={s.id}>{s.courses?.title} - {s.title}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="time_limit_minutes">Tempo Limite (minutos)</Label>
-                <Input id="time_limit_minutes" name="time_limit_minutes" type="number" defaultValue={60} required />
-              </div>
-              <Button type="submit" className="w-full bg-[#0a3a2a] hover:bg-[#0a3a2a]/90 text-[#c29a4b]">
-                Criar Prova
-              </Button>
-            </form>
+            <CreateExamForm subjects={subjects || []} />
           </CardContent>
         </Card>
 

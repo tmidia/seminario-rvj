@@ -8,28 +8,60 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Shield } from "lucide-react"
 
+import { createAdminClient } from "@/utils/supabase/admin"
+
 async function loginStudent(data: FormData) {
   "use server"
   const supabase = createClient()
   const rawCpf = data.get("cpf") as string
+
+
   const cpf = rawCpf.replace(/\D/g, "")
   
   if (!isValidCPF(cpf)) {
     redirect("/?error=CPF Inválido! O número informado matematicamente não existe.")
   }
 
+  // 1. Tenta buscar o e-mail real se a chave administrativa estiver disponível
+  let email = `${cpf}.rvj@gmail.com`
+  
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const adminSupabase = createAdminClient()
+      const { data: profile } = await adminSupabase
+        .from("profiles")
+        .select("status, email")
+        .eq("cpf", cpf)
+        .single()
+
+      if (profile) {
+        if (profile.status === 'inativo') {
+          redirect("/?error=Sua matrícula está inativa. Entre em contato com a secretaria.")
+        }
+        if (profile.email) {
+          email = profile.email
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao usar admin client no login:", err)
+      // Mantém o email padrão em caso de erro na chave ou consulta
+    }
+  }
+
+  // 2. Sign in with the calculated or fetched email
   const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: `${cpf}.rvj@gmail.com`,
+    email,
     password: `Rvj@${cpf}`,
   })
 
-  // We are not testing the admin login fallback here because it's distinct
   if (signInError) {
-    redirect("/?error=CPF não encontrado ou não matriculado")
+    redirect(`/?error=Erro: ${signInError.message} (Status: ${signInError.status || 'N/A'})`)
   }
 
   redirect("/aluno/dashboard")
 }
+
+
 
 export default async function StudentLogin({ searchParams }: { searchParams: { error?: string } }) {
   const supabase = createClient()

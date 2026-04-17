@@ -1,20 +1,27 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { redirect } from "next/navigation"
 import { CertificateSettingsForm } from "./CertificateSettingsForm"
+import { ensureCertificatesBucket } from "@/app/actions/initialize-storage"
 
 export default async function CertificateSettingsPage() {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   if (!user) {
     redirect('/auth/login')
   }
 
+  // Ensure storage is ready
+  await ensureCertificatesBucket()
+
   // Fetch current config
-  const { data: settings } = await supabase
+  const { data: settings } = await adminSupabase
     .from('certificate_settings')
     .select('*')
     .single()
+
 
   return (
     <div className="space-y-6">

@@ -1,21 +1,46 @@
 import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, Lock, PlayCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = "force-dynamic"
+
 export default async function AlunoDashboard() {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase.from('profiles').select('*, enrollments(course_id, courses(title))').eq('id', user?.id).single()
   
-  if (!profile) return <div>Perfil não encontrado.</div>
+  const { data: profile } = await adminSupabase
+    .from('profiles')
+    .select('*, enrollments(course_id, courses(title))')
+    .eq('id', user?.id)
+    .single()
+  
+  if (!profile) return (
+    <div className="p-12 text-center space-y-4">
+      <AlertCircle className="mx-auto text-amber-500" size={48} />
+      <h2 className="text-xl font-bold">Perfil não localizado</h2>
+      <p className="text-slate-500">Não conseguimos carregar seus dados de aluno (ID: {user?.id?.substring(0,8)}...). Por favor, contate o administrador.</p>
+      <Button asChild variant="outline">
+        <Link href="/auth/login">Voltar para Login</Link>
+      </Button>
+    </div>
+  )
 
   const courseIds = profile.enrollments?.map((e: { course_id: number }) => e.course_id) || []
   const courseTitles = profile.enrollments?.map((e: { courses: { title: string } }) => e.courses?.title).join(" e ")
 
-  const { data: subjects } = await supabase.from('subjects').select('*, exams(*)').in('course_id', courseIds).order('course_id').order('order_index')
-  const { data: attempts } = await supabase.from('exam_attempts').select('exam_id, score, status').eq('user_id', profile.id).eq('status', 'completed')
+  // Parallelize subjects and attempts
+  const [
+    { data: subjects },
+    { data: attempts }
+  ] = await Promise.all([
+    adminSupabase.from('subjects').select('*, exams(*)').in('course_id', courseIds).order('course_id').order('order_index'),
+    adminSupabase.from('exam_attempts').select('exam_id, score, status').eq('user_id', profile.id).eq('status', 'completed')
+  ])
+
 
   const highestScores: Record<number, number> = {}
   attempts?.forEach(a => {

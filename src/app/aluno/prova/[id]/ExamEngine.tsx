@@ -14,10 +14,17 @@ export default function ExamEngine({ attempt, exam, questions }: { attempt: Reco
   const supabase = createClient()
   const [answers, setAnswers] = useState<Record<string, string>>(attempt.answers || {})
   const [timeLeft, setTimeLeft] = useState<number>(() => {
-    const start = new Date(attempt.created_at || attempt.started_at).getTime()
+    const startStr = attempt.started_at || attempt.created_at
+    if (!startStr) return exam.time_limit_minutes * 60
+    
+    const start = new Date(startStr).getTime()
     const now = new Date().getTime()
     const diffSeconds = Math.floor((now - start) / 1000)
     const limitSeconds = exam.time_limit_minutes * 60
+    
+    // If it's negative (client clock behind server), assume full time minus 1 sec
+    if (diffSeconds < -10) return limitSeconds - 1
+    
     return Math.max(0, limitSeconds - diffSeconds)
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -32,6 +39,7 @@ export default function ExamEngine({ attempt, exam, questions }: { attempt: Reco
   const saveTimeout = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // Only auto-submit if we have a valid positive start time and it reached 0
     if (timeLeft <= 0 && !isSubmitting) {
       handleFinalSubmit()
       return
@@ -69,15 +77,21 @@ export default function ExamEngine({ attempt, exam, questions }: { attempt: Reco
     setIsSubmitting(true)
     
     try {
-      await supabase.from('exam_attempts').update({ answers }).eq('id', attempt.id)
-      await submitExamAttempt(attempt.id, exam.id)
-      router.push(`/aluno/resultado/${attempt.id}`)
+      // Process grade on server passing the answers directly
+      await submitExamAttempt(attempt.id, exam.id, answers)
+      
+      // Small buffer to ensure background revalidation processed
+      setTimeout(() => {
+        router.push(`/aluno/resultado/${attempt.id}`)
+      }, 500)
+      
     } catch (e) {
       console.error(e)
       alert("Erro ao finalizar prova. Tente novamente.")
       setIsSubmitting(false)
     }
   }
+
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)

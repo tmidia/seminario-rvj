@@ -1,17 +1,41 @@
-import { createClient } from "@/utils/supabase/server"
+import { createAdminClient } from "@/utils/supabase/admin"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { NewStudentDialog, EditStudentDialog, ToggleStudentStatusButton, ApproveStudentButton } from "./ClientForm"
 import Link from "next/link"
 
-export default async function AlunosPage() {
-  const supabase = createClient()
-  const { data: alunos, error: alunosError } = await supabase
-    .from("profiles")
-    .select("*, enrollments(courses(id,title))")
-    .eq("role", "aluno")
-    .order("created_at", { ascending: false })
+export type StudentData = {
+  id: string
+  full_name: string
+  cpf: string
+  status: string
+  created_at: string
+  enrollments: {
+    courses: {
+      id: number
+      title: string
+    }
+  }[]
+}
 
-  const { data: courses } = await supabase.from("courses").select("*")
+export const dynamic = "force-dynamic"
+
+export default async function AlunosPage() {
+  const supabase = createAdminClient()
+  
+  // Fetch profiles and courses in parallel
+  const [
+    { data: rawAlunos, error: alunosError },
+    { data: courses }
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*, enrollments(courses(id,title))")
+      .eq("role", "aluno")
+      .order("created_at", { ascending: false }),
+    supabase.from("courses").select("*")
+  ])
+
+  const alunos = rawAlunos as unknown as StudentData[]
 
   return (
     <div className="space-y-6">
@@ -49,7 +73,7 @@ export default async function AlunosPage() {
                     <td className="px-4 py-3 font-mono text-slate-600">{aluno.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</td>
                     <td className="px-4 py-3 text-slate-600">
                       {aluno.enrollments && aluno.enrollments.length > 0 
-                        ? aluno.enrollments.map((e: { courses: { title: string } }) => e.courses?.title).join(", ") 
+                        ? aluno.enrollments.map((e) => e.courses?.title).join(", ") 
                         : 'N/A'}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -63,9 +87,9 @@ export default async function AlunosPage() {
                         <Link href={`/admin/alunos/${aluno.id}`} className="inline-flex items-center justify-center p-2 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 transition-colors" title="Ver Histórico">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
                         </Link>
-                        <ApproveStudentButton student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} />
-                        <EditStudentDialog student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} courses={courses || []} />
-                        <ToggleStudentStatusButton student={aluno as unknown as { id: string, full_name: string, cpf: string, status: string, enrollments: { courses: { id: number, title: string } }[] }} />
+                        <ApproveStudentButton student={aluno} />
+                        <EditStudentDialog student={aluno} courses={courses || []} />
+                        <ToggleStudentStatusButton student={aluno} />
                       </div>
                     </td>
                   </tr>
