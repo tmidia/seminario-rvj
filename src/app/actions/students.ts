@@ -74,14 +74,15 @@ export async function createStudent(data: FormData) {
 
 
 export async function updateStudentStatus(userId: string, currentStatus: string) {
-  const adminSupabase = createServerClient()
-  const { data: adminData } = await adminSupabase.auth.getUser()
+  const supabase = createServerClient()
+  const { data: adminData } = await supabase.auth.getUser()
   if (!adminData?.user) throw new Error("Não autorizado")
 
   const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo'
+  const adminClient = createAdminClient()
   
   // 1. Update Profile
-  const { error: profileError } = await adminSupabase
+  const { error: profileError } = await adminClient
     .from('profiles')
     .update({ status: newStatus })
     .eq('id', userId)
@@ -89,7 +90,6 @@ export async function updateStudentStatus(userId: string, currentStatus: string)
   if (profileError) throw new Error("Erro ao atualizar o status no perfil.")
 
   // 2. Ban / Unban in Auth
-  const adminClient = createAdminClient()
   const banDuration = newStatus === 'inativo' ? '876000h' : 'none'
   await adminClient.auth.admin.updateUserById(userId, { ban_duration: banDuration })
 
@@ -97,8 +97,8 @@ export async function updateStudentStatus(userId: string, currentStatus: string)
 }
 
 export async function updateStudent(userId: string, data: FormData) {
-  const adminSupabase = createServerClient()
-  const { data: adminData } = await adminSupabase.auth.getUser()
+  const supabase = createServerClient()
+  const { data: adminData } = await supabase.auth.getUser()
   if (!adminData?.user) throw new Error("Não autorizado")
 
   const rawCpf = data.get("cpf") as string
@@ -123,7 +123,7 @@ export async function updateStudent(userId: string, data: FormData) {
   }
 
   // 2. Update Profile
-  const { error: profileError } = await adminSupabase
+  const { error: profileError } = await adminClient
     .from('profiles')
     .update({ cpf, full_name: fullName })
     .eq('id', userId)
@@ -132,13 +132,13 @@ export async function updateStudent(userId: string, data: FormData) {
 
   // 3. Re-enroll
   // Clear old
-  await adminSupabase.from('enrollments').delete().eq('student_id', userId)
+  await adminClient.from('enrollments').delete().eq('student_id', userId)
   // Insert new
   const newEnrollments = courseIds.map(cid => ({
     student_id: userId,
     course_id: cid
   }))
-  const { error: enrollError } = await adminSupabase.from('enrollments').insert(newEnrollments)
+  const { error: enrollError } = await adminClient.from('enrollments').insert(newEnrollments)
 
   if (enrollError) throw new Error("Erro ao atualizar matrículas do aluno.")
 

@@ -32,7 +32,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
       )
     `)
     .eq("user_id", params.id)
-    .order("created_at", { ascending: false })
+    .order("started_at", { ascending: false })
 
   if (attemptsError) {
     console.error("Erro ao buscar histórico:", attemptsError)
@@ -120,7 +120,7 @@ export default async function AdminStudentDetailsPage({ params }: { params: { id
                       <div className="mb-2 sm:mb-0 pl-2">
                         <h4 className="font-bold text-slate-800">{attempt.exams?.title}</h4>
                         <div className="text-xs font-mono text-slate-500 mt-1 flex items-center gap-2">
-                          <span>{new Date(attempt.created_at).toLocaleString('pt-BR')}</span>
+                          <span>{new Date(attempt.started_at).toLocaleString('pt-BR')}</span>
                           {isCompleted && attempt.finished_at && (
                              <span>• Finalizada em: {new Date(attempt.finished_at).toLocaleString('pt-BR')}</span>
                           )}
