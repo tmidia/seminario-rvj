@@ -50,7 +50,6 @@ export async function createStudent(data: FormData) {
       id: userId,
       full_name: fullName,
       cpf: cpf,
-      email: `${cpf}.rvj@gmail.com`,
       role: 'aluno',
       status: 'ativo'
     })
