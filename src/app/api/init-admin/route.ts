@@ -56,7 +56,8 @@ export async function GET(request: Request) {
 
       return NextResponse.json({ success: true, message: `Novo administrador criado: ${email}`, password })
     }
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: errorMsg }, { status: 500 })
   }
 }

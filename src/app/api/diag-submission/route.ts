@@ -10,12 +10,14 @@ export async function GET() {
     await submitExamAttempt("999999", 3, {});
     
     return NextResponse.json({ status: "ok", message: "Motor de submissão acessível e funcional." });
-  } catch (error: any) {
-    console.error("DIAGNOSTICO FALHOU:", error.message);
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error("DIAGNOSTICO FALHOU:", errorMsg);
     return NextResponse.json({ 
       status: "error", 
-      message: error.message,
-      stack: error.stack 
+      message: errorMsg,
+      stack: errorStack 
     });
   }
 }

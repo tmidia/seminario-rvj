@@ -1,7 +1,6 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
  
 export async function submitExamAttempt(attemptId: string, examId: number, answers?: Record<string, string>) {

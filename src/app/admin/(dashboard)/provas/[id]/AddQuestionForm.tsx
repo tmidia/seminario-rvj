@@ -49,7 +49,8 @@ export function AddQuestionForm({ examId }: { examId: number }) {
       } else {
         setError(result.error || "Ocorreu um erro ao adicionar a questão.")
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      console.error("handleSubmit: Erro inesperado:", err)
       setError("Erro de rede ou inesperado. Tente novamente.")
     }
   }

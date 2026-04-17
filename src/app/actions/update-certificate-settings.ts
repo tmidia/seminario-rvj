@@ -4,7 +4,21 @@ import { revalidatePath } from "next/cache"
 import { createClient as createServerClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
 
-export async function updateCertificateSettings(settings: any) {
+interface CertificateSettings {
+  signature_1_name: string
+  signature_1_role: string
+  signature_2_name: string
+  signature_2_role: string
+  layout_scale: number
+  margin_top: number
+  logo_url: string
+  seal_url: string
+  signature_1_url: string
+  signature_2_url: string
+  bg_image_url: string
+}
+
+export async function updateCertificateSettings(settings: CertificateSettings) {
   try {
     const supabase = createServerClient()
     const { data: adminData } = await supabase.auth.getUser()

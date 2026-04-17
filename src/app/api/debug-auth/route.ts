@@ -25,7 +25,8 @@ export async function GET() {
     }))
 
     return NextResponse.json({ admins: adminDetails })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: errorMsg }, { status: 500 })
   }
 }

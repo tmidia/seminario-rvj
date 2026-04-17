@@ -42,14 +42,18 @@ export async function loginAdmin(formData: FormData) {
     }
 
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro crítico no loginAdmin:", err)
     
     // Specifically handle DNS/Network errors
+    const errorMsg = err instanceof Error ? err.message : String(err)
+    const errorCode = (err as { code?: string })?.code
+    const errorCause = (err as { cause?: { code?: string } })?.cause?.code
+
     const isNetworkError = 
-      err.message?.toLowerCase().includes('fetch failed') || 
-      err.cause?.code === 'EAI_AGAIN' || 
-      err.code === 'EAI_AGAIN'
+      errorMsg.toLowerCase().includes('fetch failed') || 
+      errorCause === 'EAI_AGAIN' || 
+      errorCode === 'EAI_AGAIN'
 
     if (isNetworkError) {
       return { 
@@ -57,6 +61,6 @@ export async function loginAdmin(formData: FormData) {
       }
     }
     
-    return { error: `Erro inesperado: ${err.message}` }
+    return { error: `Erro inesperado: ${errorMsg}` }
   }
 }

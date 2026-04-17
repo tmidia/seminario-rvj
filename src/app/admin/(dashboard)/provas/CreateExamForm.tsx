@@ -35,7 +35,7 @@ interface Subject {
   courses?: { title: string } | null
 }
 
-export function CreateExamForm({ subjects }: { subjects: any[] }) {
+export function CreateExamForm({ subjects }: { subjects: Subject[] }) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
@@ -56,7 +56,8 @@ export function CreateExamForm({ subjects }: { subjects: any[] }) {
       } else {
         setError(result.error || "Ocorreu um erro ao criar a prova.")
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      console.error("handleSubmit: Erro inesperado:", err)
       setError("Erro de rede ou inesperado. Tente novamente.")
     }
   }

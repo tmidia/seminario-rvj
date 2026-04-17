@@ -99,6 +99,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-start pt-12 items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img src={settings.bg_image_url} alt="Background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
           )}
           
@@ -132,6 +133,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             <div className="text-center mt-12 mb-6 relative">
               <div className="flex justify-center mb-4">
                  {settings?.logo_url ? (
+                   /* eslint-disable-next-line @next/next/no-img-element */
                    <img src={settings.logo_url} className="h-20 object-contain" alt="Logo" crossOrigin="anonymous" />
                  ) : (
                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-800">
@@ -166,6 +168,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           {/* Bottom Seal & Footer */}
           <div className="absolute bottom-12 right-12 z-20">
             {settings?.seal_url ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img src={settings.seal_url} alt="Selo de Autenticidade" crossOrigin="anonymous" className="w-32 h-32 object-contain drop-shadow-md" />
             ) : (
               <div className="w-28 h-28 rounded-full border-4 border-[#c29a4b] flex items-center justify-center relative opacity-80 backdrop-blur-sm">
@@ -187,6 +190,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         <div ref={backRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img src={settings.bg_image_url} alt="Background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0 opacity-20 pointer-events-none" />
           )}
 
@@ -219,6 +223,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-24 relative flex justify-center items-end pb-1">
                 {settings?.signature_1_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={settings.signature_1_url} className="h-24 object-contain absolute bottom-1 scale-125 origin-bottom" alt="Signature 1" crossOrigin="anonymous" />
                 ) : (
                   <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-5deg]`}>{settings?.signature_1_name || 'Pr. Wagner F. G.'}</span>
@@ -231,6 +236,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             <div className="flex flex-col items-center w-64">
               <div className="w-full border-b border-slate-800 h-24 relative flex justify-center items-end pb-1">
                 {settings?.signature_2_url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={settings.signature_2_url} className="h-24 object-contain absolute bottom-1 scale-125 origin-bottom" alt="Signature 2" crossOrigin="anonymous" />
                 ) : (
                   <span className={`${greatVibes.className} text-4xl text-[#0a3a2a]/60 absolute bottom-1 rotate-[-10deg]`}>{settings?.signature_2_name || 'Pr. Marcelo Ribeiro'}</span>

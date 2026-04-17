@@ -40,9 +40,10 @@ export async function createExam(data: FormData) {
     console.log("createExam: Prova criada com sucesso")
     revalidatePath("/admin/provas")
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao criar prova"
     console.error("createExam: Erro inesperado:", err)
-    return { success: false, error: err.message || "Erro inesperado ao criar prova" }
+    return { success: false, error: errorMsg }
   }
 }
 
@@ -120,9 +121,10 @@ export async function addQuestion(data: FormData) {
     console.log("addQuestion: Questão adicionada com sucesso")
     revalidatePath(`/admin/provas/${examId}`)
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : "Erro inesperado ao adicionar questão"
     console.error("addQuestion: Erro inesperado:", err)
-    return { success: false, error: err.message || "Erro inesperado ao adicionar questão" }
+    return { success: false, error: errorMsg }
   }
 }
 
