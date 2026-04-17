@@ -31,13 +31,20 @@ export async function createStudent(data: FormData) {
       user_metadata: { full_name: fullName }
     })
 
-    if (authError && authError.message !== 'User already exists') {
-      throw new Error(`Erro ao criar acesso: ${authError.message}`)
+    if (authError) {
+       const isAlreadyExisting = 
+         authError.message === 'User already exists' || 
+         authError.message.includes('already been registered') ||
+         authError.status === 422;
+
+       if (!isAlreadyExisting) {
+         throw new Error(`Erro ao criar acesso: ${authError.message}`)
+       }
     }
 
     // Se o usuário já existia, buscamos o ID dele
     let userId = authUser?.user?.id
-    if (!userId && authError?.message === 'User already exists') {
+    if (!userId) {
       const { data: userData, error: listError } = await adminSupabase.auth.admin.listUsers()
       if (listError) throw new Error(`Erro ao buscar usuário existente: ${listError.message}`)
       userId = userData?.users?.find(u => u.email === `${cpf}.rvj@gmail.com`)?.id
