@@ -244,8 +244,8 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
           <div className="absolute bottom-8 w-full text-center px-24 z-20">
              <p className="text-[10px] text-slate-400">Este certificado é emitido de acordo com o Decreto nº 5.154, de 23 de julho de 2004, que regulamenta a oferta de cursos livres no Brasil.</p>
           </div>
+          </div>
         </div>
-
 
         {/* --- BACK PAGE --- */}
         <div 
