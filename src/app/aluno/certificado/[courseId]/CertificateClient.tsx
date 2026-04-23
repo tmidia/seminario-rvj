@@ -41,19 +41,25 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
   useEffect(() => {
     const handleResize = () => {
-      if (typeof window !== 'undefined') {
-        const availableWidth = window.innerWidth - 32 // 16px padding each side
-        if (availableWidth < 1123) {
-          setPreviewScale(availableWidth / 1123)
-        } else {
-          setPreviewScale(1)
-        }
+      const availableWidth = window.innerWidth - 48 // More padding for safety
+      if (availableWidth < 1123) {
+        setPreviewScale(availableWidth / 1123)
+      } else {
+        setPreviewScale(1)
       }
     }
 
+    // Initial run
     handleResize()
+    
+    // Multiple checks to handle potential delay in rendering/window calculation
+    const timer = setTimeout(handleResize, 100)
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timer)
+    }
   }, [])
 
   const downloadPDF = async () => {
@@ -77,6 +83,8 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             const el = doc.getElementById('certificate-front')
             if (el) {
               el.style.transform = 'none'
+              el.style.left = '0'
+              el.style.marginLeft = '0'
               el.style.width = '1123px'
               el.style.height = '794px'
             }
@@ -98,6 +106,8 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             const el = doc.getElementById('certificate-back')
             if (el) {
               el.style.transform = 'none'
+              el.style.left = '0'
+              el.style.marginLeft = '0'
               el.style.width = '1123px'
               el.style.height = '794px'
             }
@@ -138,14 +148,14 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         </Button>
       </div>
 
-      <div className="flex flex-col gap-8 text-slate-900 pb-12 items-center w-full">
+      <div className="flex flex-col gap-8 text-slate-900 pb-12 items-center w-full max-w-full overflow-hidden">
         {/* --- FRONT PAGE --- */}
         <div 
-          className="relative shrink-0 shadow-2xl" 
+          className="relative shadow-2xl flex justify-center" 
           style={{ 
-            width: `${1123 * previewScale}px`, 
+            width: '100%',
+            maxWidth: '1123px',
             height: `${794 * previewScale}px`,
-            overflow: 'hidden'
           }}
         >
           <div 
@@ -154,7 +164,10 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             style={{ 
               ...a4Style, 
               transform: `scale(${previewScale})`, 
-              transformOrigin: 'top left',
+              transformOrigin: 'top center',
+              position: 'absolute',
+              left: '50%',
+              marginLeft: '-561.5px' // Center the 1123px div
             }} 
             className="bg-white relative flex flex-col justify-start pt-12 items-center border-[16px] border-[#0a3a2a] overflow-hidden"
           >
@@ -249,11 +262,11 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
         {/* --- BACK PAGE --- */}
         <div 
-          className="relative shrink-0 shadow-2xl" 
+          className="relative shadow-2xl flex justify-center" 
           style={{ 
-            width: `${1123 * previewScale}px`, 
+            width: '100%',
+            maxWidth: '1123px',
             height: `${794 * previewScale}px`,
-            overflow: 'hidden'
           }}
         >
           <div 
@@ -262,7 +275,10 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
             style={{ 
               ...a4Style, 
               transform: `scale(${previewScale})`, 
-              transformOrigin: 'top left',
+              transformOrigin: 'top center',
+              position: 'absolute',
+              left: '50%',
+              marginLeft: '-561.5px' // Center the 1123px div
             }} 
             className="bg-white relative flex flex-col items-center border-[16px] border-[#0a3a2a] overflow-hidden"
           >
