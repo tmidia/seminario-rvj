@@ -41,7 +41,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
   useEffect(() => {
     const handleResize = () => {
-      const availableWidth = window.innerWidth - 48 // More padding for safety
+      const availableWidth = window.innerWidth - 64 // 32px padding each side for extra safety
       if (availableWidth < 1123) {
         setPreviewScale(availableWidth / 1123)
       } else {
@@ -132,7 +132,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
   return (
     <div className="min-h-screen bg-slate-200 py-8 px-4 flex flex-col items-center">
       {/* Toolbar */}
-      <div className="w-full max-w-[1123px] flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
+      <div className="w-full max-w-[1123px] flex flex-col sm:flex-row gap-4 items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm">
         <Link href="/aluno/historico">
           <Button variant="outline" className="flex gap-2">
             <ChevronLeft size={16} /> Voltar ao Histórico
@@ -148,7 +148,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         </Button>
       </div>
 
-      <div className="flex flex-col gap-8 text-slate-900 pb-12 items-center w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-8 text-slate-900 pb-12 items-center w-full max-w-full">
         {/* --- FRONT PAGE --- */}
         <div 
           className="relative shadow-2xl flex justify-center" 
