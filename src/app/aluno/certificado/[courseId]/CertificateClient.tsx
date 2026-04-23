@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Great_Vibes } from 'next/font/google'
 import { Button } from '@/components/ui/button'
 import { Download, ChevronLeft } from 'lucide-react'
@@ -37,6 +37,24 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [previewScale, setPreviewScale] = useState(1)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        const availableWidth = window.innerWidth - 32 // 16px padding each side
+        if (availableWidth < 1123) {
+          setPreviewScale(availableWidth / 1123)
+        } else {
+          setPreviewScale(1)
+        }
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const downloadPDF = async () => {
     try {
@@ -50,7 +68,20 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
       // Generate Front Page
       if (frontRef.current) {
-        const canvasFront = await html2canvas(frontRef.current, { scale: 2, useCORS: true })
+        const canvasFront = await html2canvas(frontRef.current, { 
+          scale: 2, 
+          useCORS: true,
+          width: 1123,
+          height: 794,
+          onclone: (doc) => {
+            const el = doc.getElementById('certificate-front')
+            if (el) {
+              el.style.transform = 'none'
+              el.style.width = '1123px'
+              el.style.height = '794px'
+            }
+          }
+        })
         const imgDataFront = canvasFront.toDataURL('image/png')
         pdf.addImage(imgDataFront, 'PNG', 0, 0, pdfWidth, pdfHeight)
       }
@@ -58,7 +89,20 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
       // Generate Back Page
       if (backRef.current) {
         pdf.addPage()
-        const canvasBack = await html2canvas(backRef.current, { scale: 2, useCORS: true })
+        const canvasBack = await html2canvas(backRef.current, { 
+          scale: 2, 
+          useCORS: true,
+          width: 1123,
+          height: 794,
+          onclone: (doc) => {
+            const el = doc.getElementById('certificate-back')
+            if (el) {
+              el.style.transform = 'none'
+              el.style.width = '1123px'
+              el.style.height = '794px'
+            }
+          }
+        })
         const imgDataBack = canvasBack.toDataURL('image/png')
         pdf.addImage(imgDataBack, 'PNG', 0, 0, pdfWidth, pdfHeight)
       }
@@ -94,9 +138,26 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
         </Button>
       </div>
 
-      <div className="flex flex-col gap-12 text-slate-900 overflow-x-auto pb-12 items-center w-full">
+      <div className="flex flex-col gap-8 text-slate-900 pb-12 items-center w-full">
         {/* --- FRONT PAGE --- */}
-        <div ref={frontRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col justify-start pt-12 items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
+        <div 
+          className="relative shrink-0 shadow-2xl" 
+          style={{ 
+            width: `${1123 * previewScale}px`, 
+            height: `${794 * previewScale}px`,
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            id="certificate-front"
+            ref={frontRef} 
+            style={{ 
+              ...a4Style, 
+              transform: `scale(${previewScale})`, 
+              transformOrigin: 'top left',
+            }} 
+            className="bg-white relative flex flex-col justify-start pt-12 items-center border-[16px] border-[#0a3a2a] overflow-hidden"
+          >
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
             /* eslint-disable-next-line @next/next/no-img-element */
@@ -187,7 +248,24 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
 
         {/* --- BACK PAGE --- */}
-        <div ref={backRef} style={a4Style} className="bg-white relative shadow-2xl flex flex-col items-center shrink-0 border-[16px] border-[#0a3a2a] overflow-hidden">
+        <div 
+          className="relative shrink-0 shadow-2xl" 
+          style={{ 
+            width: `${1123 * previewScale}px`, 
+            height: `${794 * previewScale}px`,
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            id="certificate-back"
+            ref={backRef} 
+            style={{ 
+              ...a4Style, 
+              transform: `scale(${previewScale})`, 
+              transformOrigin: 'top left',
+            }} 
+            className="bg-white relative flex flex-col items-center border-[16px] border-[#0a3a2a] overflow-hidden"
+          >
           {/* Custom Background Image */}
           {settings?.bg_image_url && (
             /* eslint-disable-next-line @next/next/no-img-element */
@@ -255,6 +333,7 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
 
           <div className="absolute bottom-8 w-full text-center px-24">
              <p className="text-[10px] text-slate-400">Este documento é parte integrante do histórico correspondente, emitido em duas vias.</p>
+          </div>
           </div>
         </div>
       </div>
