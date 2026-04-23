@@ -208,6 +208,7 @@ export function ApproveStudentButton({ student }: { student: Student }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState<string | null>(null) // 'full' or 'partial'
+  const [score, setScore] = useState("10.0")
 
   const handleApprove = async (mode: 'full' | 'partial') => {
     const confirmMsg = mode === 'full' 
@@ -218,7 +219,7 @@ export function ApproveStudentButton({ student }: { student: Student }) {
     
     setLoading(mode)
     try {
-      const res = await approveStudentForCertificates(student.id, mode === 'partial')
+      const res = await approveStudentForCertificates(student.id, mode === 'partial', parseFloat(score) || 10.0)
       if (res?.error) {
         alert(res.error)
         return
@@ -252,9 +253,28 @@ export function ApproveStudentButton({ student }: { student: Student }) {
         </DialogHeader>
         <div className="space-y-4 py-2">
           <p className="text-slate-600 text-sm">
-            Selecione como deseja realizar a aprovação para <strong>{student.full_name}</strong>:
+            Defina a nota e escolha o tipo de aprovação para <strong>{student.full_name}</strong>:
           </p>
-          
+
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+            <Label htmlFor="grade" className="text-[#0a3a2a] font-bold">Nota para Aprovação</Label>
+            <div className="flex items-center gap-3">
+              <Input 
+                id="grade"
+                type="number" 
+                step="0.1" 
+                min="0" 
+                max="10" 
+                value={score} 
+                onChange={(e) => setScore(e.target.value)}
+                className="w-24 text-center font-bold text-lg"
+              />
+              <span className="text-xs text-slate-500">
+                Esta nota será atribuída a todas as provas aprovadas nesta ação.
+              </span>
+            </div>
+          </div>
+
           <div className="grid gap-3">
             <button 
               onClick={() => handleApprove('full')}
@@ -268,7 +288,7 @@ export function ApproveStudentButton({ student }: { student: Student }) {
                 <div className="font-bold text-[#0a3a2a]">Aprovação Total (Tudo)</div>
               </div>
               <p className="text-xs text-slate-500 ml-11">
-                Lança nota 10.0 em TODAS as matérias dos cursos vinculados. Ideal para liberar o certificado imediatamente.
+                Lança nota {score} em TODAS as matérias dos cursos vinculados. Ideal para liberar o certificado imediatamente.
               </p>
               {loading === 'full' && <div className="absolute top-4 right-4 animate-spin h-4 w-4 border-2 border-[#c29a4b] border-t-transparent rounded-full" />}
             </button>
@@ -285,7 +305,7 @@ export function ApproveStudentButton({ student }: { student: Student }) {
                 <div className="font-bold text-[#0a3a2a]">Aprovar Apenas Realizadas</div>
               </div>
               <p className="text-xs text-slate-500 ml-11">
-                Lança nota 10.0 APENAS nas provas que o aluno já iniciou ou tentou fazer. Útil para alunos do sistema antigo.
+                Lança nota {score} APENAS nas provas que o aluno já iniciou ou tentou fazer. Útil para alunos do sistema antigo.
               </p>
               {loading === 'partial' && <div className="absolute top-4 right-4 animate-spin h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full" />}
             </button>

@@ -164,7 +164,7 @@ export async function updateStudent(userId: string, data: FormData) {
   }
 }
 
-export async function approveStudentForCertificates(studentId: string, onlyCompleted: boolean = false) {
+export async function approveStudentForCertificates(studentId: string, onlyCompleted: boolean = false, score: number = 10.0) {
   try {
     const supabase = createServerClient()
     const { data: adminData } = await supabase.auth.getUser()
@@ -238,7 +238,7 @@ export async function approveStudentForCertificates(studentId: string, onlyCompl
       user_id: studentId,
       exam_id: examId,
       status: 'completed',
-      score: 10.0,
+      score: score,
       started_at: new Date().toISOString(),
       finished_at: new Date().toISOString(),
       answers: {}
