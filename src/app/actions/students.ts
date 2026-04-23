@@ -164,7 +164,7 @@ export async function updateStudent(userId: string, data: FormData) {
   }
 }
 
-export async function approveStudentForCertificates(studentId: string) {
+export async function approveStudentForCertificates(studentId: string, onlyCompleted: boolean = false) {
   try {
     const supabase = createServerClient()
     const { data: adminData } = await supabase.auth.getUser()
@@ -187,27 +187,46 @@ export async function approveStudentForCertificates(studentId: string) {
     
     if (!subjects || subjects.length === 0) return { error: "Nenhuma matéria encontrada para os cursos matriculados." }
 
-    const missingExams = subjects.filter((s: { exams?: { id: number }[] }) => !s.exams || s.exams.length === 0)
-    if (missingExams.length > 0) {
-      // Auto-generate missing exams so the certificate can be emitted
-      const examsToCreate = missingExams.map((s: { id: number }) => ({
-        subject_id: s.id,
-        title: "Avaliação Automática (Aprovação Direta)",
-        time_limit_minutes: 120,
-        is_active: true
-      }))
+    // If not onlyCompleted, we might need to auto-generate missing exams
+    if (!onlyCompleted) {
+      const missingExams = subjects.filter((s: { exams?: { id: number }[] }) => !s.exams || s.exams.length === 0)
+      if (missingExams.length > 0) {
+        // Auto-generate missing exams so the certificate can be emitted
+        const examsToCreate = missingExams.map((s: { id: number }) => ({
+          subject_id: s.id,
+          title: "Avaliação Automática (Aprovação Direta)",
+          time_limit_minutes: 120,
+          is_active: true
+        }))
 
-      const { data: newExams, error: createErr } = await adminSupabase.from('exams').insert(examsToCreate).select('id, subject_id')
-      if (createErr || !newExams) return { error: "Erro ao gerar provas automáticas: " + createErr?.message }
+        const { data: newExams, error: createErr } = await adminSupabase.from('exams').insert(examsToCreate).select('id, subject_id')
+        if (createErr || !newExams) return { error: "Erro ao gerar provas automáticas: " + createErr?.message }
 
-      // Re-attach newly created exams to subjects so mapping works below
-      missingExams.forEach((s: { id: number, exams?: { id: number }[] }) => {
-        const created = newExams.find(ne => ne.subject_id === s.id)
-        if (created) s.exams = [{ id: created.id }]
-      })
+        // Re-attach newly created exams to subjects so mapping works below
+        missingExams.forEach((s: { id: number, exams?: { id: number }[] }) => {
+          const created = newExams.find(ne => ne.subject_id === s.id)
+          if (created) s.exams = [{ id: created.id }]
+        })
+      }
     }
 
-    const examIdsToApprove = subjects.map((s: { exams: { id: number }[] }) => s.exams[0].id)
+    let examIdsToApprove = subjects
+      .filter((s: { exams: { id: number }[] }) => s.exams && s.exams.length > 0)
+      .map((s: { exams: { id: number }[] }) => s.exams[0].id)
+
+    if (onlyCompleted) {
+      const { data: attempts } = await adminSupabase
+        .from('exam_attempts')
+        .select('exam_id')
+        .eq('user_id', studentId)
+      
+      const attemptedExamIds = new Set(attempts?.map(a => a.exam_id) || [])
+      examIdsToApprove = examIdsToApprove.filter(id => attemptedExamIds.has(id))
+
+      if (examIdsToApprove.length === 0) {
+        return { error: "Este aluno não possui nenhuma tentativa de prova realizada para ser aprovada." }
+      }
+    }
 
     // Clear existing attempts for those exact exams to prevent duplication
     await adminSupabase.from('exam_attempts')

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { CpfInput } from "@/components/CpfInput"
 import { Label } from "@/components/ui/label"
 import { createStudent, updateStudent, updateStudentStatus, approveStudentForCertificates } from "@/app/actions/students"
-import { AlertCircle, UserPlus, Edit2, Power, Award } from "lucide-react"
+import { AlertCircle, UserPlus, Edit2, Power, Award, CheckCircle2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { isValidCPF } from "@/utils/cpf"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -206,38 +206,92 @@ export function ToggleStudentStatusButton({ student }: { student: Student }) {
 
 export function ApproveStudentButton({ student }: { student: Student }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null) // 'full' or 'partial'
 
-  const handleApprove = async () => {
-    if (!confirm(`Tem certeza que deseja APROVAR este aluno em TODAS as matérias do(s) curso(s) dele? Esta ação lançará notas automáticas máximas para que ele consiga emitir o certificado imediatamente.`)) return
+  const handleApprove = async (mode: 'full' | 'partial') => {
+    const confirmMsg = mode === 'full' 
+      ? `Tem certeza que deseja APROVAR este aluno em TODAS as matérias? Esta ação lançará notas máximas em tudo.`
+      : `Deseja aprovar apenas as provas que o aluno JÁ REALIZOU? As provas não iniciadas continuarão pendentes.`
     
-    setLoading(true)
+    if (!confirm(confirmMsg)) return
+    
+    setLoading(mode)
     try {
-      const res = await approveStudentForCertificates(student.id)
+      const res = await approveStudentForCertificates(student.id, mode === 'partial')
       if (res?.error) {
         alert(res.error)
-        setLoading(false)
         return
       }
-      alert("Sucesso! O aluno foi aprovado e já pode emitir o certificado pelo painel dele.")
+      alert("Sucesso! O aluno foi atualizado.")
+      setOpen(false)
       router.refresh()
     } catch {
       alert("Erro desconhecido de rede.")
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
   return (
-    <Button 
-      variant="outline"
-      size="sm" 
-      onClick={handleApprove} 
-      disabled={loading || student.status === 'inativo'}
-      className="h-8 text-[#c29a4b] hover:text-[#a6823c] hover:bg-[#fdfbf6] border-[#c29a4b]/30"
-      title="Gerar Notas Máximas e Liberar Certificado"
-    >
-      <Award size={14} className="mr-1" /> {loading ? "Aprovando..." : "Aprovar"}
-    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline"
+          size="sm" 
+          disabled={student.status === 'inativo'}
+          className="h-8 text-[#c29a4b] hover:text-[#a6823c] hover:bg-[#fdfbf6] border-[#c29a4b]/30"
+          title="Opções de Aprovação"
+        >
+          <Award size={14} className="mr-1" /> Aprovar
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md border-t-4 border-t-[#c29a4b]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-serif text-[#0a3a2a]">Opções de Aprovação</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <p className="text-slate-600 text-sm">
+            Selecione como deseja realizar a aprovação para <strong>{student.full_name}</strong>:
+          </p>
+          
+          <div className="grid gap-3">
+            <button 
+              onClick={() => handleApprove('full')}
+              disabled={!!loading}
+              className="group relative w-full p-4 text-left border rounded-lg hover:border-[#c29a4b] hover:bg-[#fdfbf6] transition-all disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 bg-[#fdfbf6] rounded-full text-[#c29a4b] group-hover:bg-[#c29a4b] group-hover:text-white transition-colors">
+                  <Award size={20} />
+                </div>
+                <div className="font-bold text-[#0a3a2a]">Aprovação Total (Tudo)</div>
+              </div>
+              <p className="text-xs text-slate-500 ml-11">
+                Lança nota 10.0 em TODAS as matérias dos cursos vinculados. Ideal para liberar o certificado imediatamente.
+              </p>
+              {loading === 'full' && <div className="absolute top-4 right-4 animate-spin h-4 w-4 border-2 border-[#c29a4b] border-t-transparent rounded-full" />}
+            </button>
+
+            <button 
+              onClick={() => handleApprove('partial')}
+              disabled={!!loading}
+              className="group relative w-full p-4 text-left border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 bg-emerald-50 rounded-full text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                  <CheckCircle2 size={20} />
+                </div>
+                <div className="font-bold text-[#0a3a2a]">Aprovar Apenas Realizadas</div>
+              </div>
+              <p className="text-xs text-slate-500 ml-11">
+                Lança nota 10.0 APENAS nas provas que o aluno já iniciou ou tentou fazer. Útil para alunos do sistema antigo.
+              </p>
+              {loading === 'partial' && <div className="absolute top-4 right-4 animate-spin h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full" />}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
