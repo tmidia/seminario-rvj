@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 import Link from "next/link"
-import { History, LayoutDashboard, LogOut } from "lucide-react"
+import { FileText, History, LayoutDashboard, LogOut } from "lucide-react"
 import { createClient } from "@/utils/supabase/server"
 
 export default async function AlunoLayout({ children }: { children: ReactNode }) {
@@ -18,6 +18,7 @@ export default async function AlunoLayout({ children }: { children: ReactNode })
           </div>
           
           <nav className="hidden md:flex items-center gap-6 text-sm">
+            <Link href="/aluno/declaracao" className="flex items-center gap-2 hover:text-[#c29a4b] transition-colors"><FileText size={16}/> Declaração</Link>
             <Link href="/aluno/dashboard" className="flex items-center gap-2 hover:text-[#c29a4b] transition-colors"><LayoutDashboard size={16}/> Minhas Matérias</Link>
             <Link href="/aluno/historico" className="flex items-center gap-2 hover:text-[#c29a4b] transition-colors"><History size={16}/> Meu Histórico</Link>
           </nav>
@@ -41,6 +42,10 @@ export default async function AlunoLayout({ children }: { children: ReactNode })
       </main>
 
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-50 pb-safe">
+        <Link href="/aluno/declaracao" className="flex flex-col items-center gap-1 text-xs text-slate-600">
+          <FileText size={20} />
+          Declaração
+        </Link>
         <Link href="/aluno/dashboard" className="flex flex-col items-center gap-1 text-xs text-slate-600">
           <LayoutDashboard size={20} />
           Matérias
