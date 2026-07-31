@@ -20,6 +20,8 @@ interface DeclarationClientProps {
   formattedCpf: string
   courseTitle: string
   issuedAt: string
+  isCompleted: boolean
+  completionDate: string | null
   settings: DeclarationSettings
 }
 
@@ -31,6 +33,8 @@ export function DeclarationClient({
   formattedCpf,
   courseTitle,
   issuedAt,
+  isCompleted,
+  completionDate,
   settings,
 }: DeclarationClientProps) {
   const documentRef = useRef<HTMLDivElement>(null)
@@ -131,10 +135,19 @@ export function DeclarationClient({
 
                 <main className="mt-20 flex-1 text-[20px] leading-[1.9] text-slate-700">
                   <p className="text-justify indent-12">
-                    Declaramos, para os devidos fins, que <strong className="font-bold text-[#0a3a2a]">{studentName}</strong>, inscrito(a) no CPF sob o número <strong className="font-bold text-[#0a3a2a]">{formattedCpf}</strong>, encontra-se regularmente matriculado(a) e cursando o <strong className="font-bold text-[#0a3a2a]">{courseTitle}</strong> nesta instituição de ensino teológico.
+                    Declaramos, para os devidos fins, que <strong className="font-bold text-[#0a3a2a]">{studentName}</strong>, inscrito(a) no CPF sob o número <strong className="font-bold text-[#0a3a2a]">{formattedCpf}</strong>,{" "}
+                    {isCompleted ? (
+                      <>
+                        esteve devidamente matriculado(a) no <strong className="font-bold text-[#0a3a2a]">{courseTitle}</strong>, tendo concluído todas as matérias{completionDate ? ` em ${completionDate}` : ""}.
+                      </>
+                    ) : (
+                      <>
+                        encontra-se devidamente matriculado(a) no <strong className="font-bold text-[#0a3a2a]">{courseTitle}</strong>.
+                      </>
+                    )}
                   </p>
                   <p className="mt-9 text-justify indent-12">
-                    A presente declaração reflete a situação acadêmica do(a) aluno(a) na data de sua emissão e é expedida a seu pedido.
+                    A presente declaração reflete a situação de matrícula do(a) aluno(a) na data de sua emissão e é expedida a seu pedido.
                   </p>
                   <p className="mt-9 text-justify indent-12">Por ser verdade, firmamos a presente declaração.</p>
                   <p className="mt-14 text-right">Emitida em {issuedAt}.</p>
