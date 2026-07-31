@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
+import { singleRelation } from "@/utils/relation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { FileText, GraduationCap, Info } from "lucide-react"
@@ -36,7 +37,7 @@ export default async function DeclarationPage() {
     .eq("profile_id", user.id)
 
   const courses = (enrollments ?? []).flatMap((enrollment) => {
-    const course = enrollment.courses as Course | null
+    const course = singleRelation<Course>(enrollment.courses)
     return course ? [course] : []
   })
 
