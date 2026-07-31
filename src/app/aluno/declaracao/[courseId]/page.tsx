@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server"
 import { createAdminClient } from "@/utils/supabase/admin"
+import { singleRelation } from "@/utils/relation"
 import { redirect } from "next/navigation"
 import { DeclarationClient } from "./DeclarationClient"
 
@@ -36,20 +37,20 @@ export default async function DeclarationDocumentPage({ params }: { params: { co
     .eq("course_id", courseId)
     .maybeSingle()
 
-  const course = enrollment?.courses as Course | null
+  const course = singleRelation<Course>(enrollment?.courses)
   if (!course) redirect("/aluno/declaracao")
 
   const { data: settings } = await adminSupabase
     .from("certificate_settings")
     .select("logo_url, signature_1_url, signature_1_name, signature_1_role, signature_2_url, signature_2_name, signature_2_role")
-    .single()
+    .maybeSingle()
 
   return (
     <DeclarationClient
-      studentName={profile.full_name}
+      studentName={profile.full_name || "Aluno(a)"}
       formattedCpf={formatCpf(profile.cpf)}
       courseTitle={course.title}
-      issuedAt={new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeZone: "America/Rio_Branco" }).format(new Date())}
+      issuedAt={new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeZone: "America/Sao_Paulo" }).format(new Date())}
       settings={settings ?? {}}
     />
   )

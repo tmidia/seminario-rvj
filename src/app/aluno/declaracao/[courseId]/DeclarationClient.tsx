@@ -118,7 +118,7 @@ export function DeclarationClient({
                 <header className="text-center">
                   {settings.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={settings.logo_url} alt="Logo do Seminário RVJ" className="mx-auto mb-5 h-24 max-w-[220px] object-contain" />
+                    <img src={settings.logo_url} alt="Logo do Seminário RVJ" crossOrigin="anonymous" className="mx-auto mb-5 h-24 max-w-[220px] object-contain" />
                   ) : (
                     <div className="mb-5 flex justify-center text-[#0a3a2a]">
                       <FileText size={54} strokeWidth={1.4} />
@@ -167,7 +167,7 @@ function Signature({ imageUrl, name, role }: { imageUrl?: string | null; name?: 
       <div className="flex h-16 items-end justify-center">
         {imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="Assinatura" className="max-h-16 max-w-[190px] object-contain" />
+          <img src={imageUrl} alt="Assinatura" crossOrigin="anonymous" className="max-h-16 max-w-[190px] object-contain" />
         )}
       </div>
       <div className="border-t border-slate-500 pt-2">
