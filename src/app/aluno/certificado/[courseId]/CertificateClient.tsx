@@ -208,15 +208,21 @@ export function CertificateClient({ studentName, courseTitle, hours, completionD
               <div className="flex justify-center mb-4">
                  {settings?.logo_url ? (
                    /* eslint-disable-next-line @next/next/no-img-element */
-                   <img src={settings.logo_url} className="h-20 object-contain" alt="Logo" crossOrigin="anonymous" />
+                   <img src={settings.logo_url} className="h-32 object-contain" alt="Logo" crossOrigin="anonymous" />
                  ) : (
                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-800">
                      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
                    </svg>
                  )}
               </div>
-              <h1 className="text-3xl font-serif font-bold text-[#0a3a2a] tracking-wider uppercase">Seminário Teológico</h1>
-              <p className="text-sm tracking-[0.3em] font-semibold text-slate-500 mt-2">REV. VALDEMAR DE JESUS SILVA</p>
+              {/* O logotipo cadastrado ja traz o nome da instituicao; sem ele,
+                  o nome precisa ser escrito para identificar o documento. */}
+              {!settings?.logo_url && (
+                <>
+                  <h1 className="text-3xl font-serif font-bold text-[#0a3a2a] tracking-wider uppercase">Seminário Teológico</h1>
+                  <p className="text-sm tracking-[0.3em] font-semibold text-slate-500 mt-2">REV. VALDEMAR DE JESUS SILVA</p>
+                </>
+              )}
             </div>
 
             <p className="text-lg font-medium text-slate-700 tracking-wide mt-2">O Seminário Teológico Rev. Valdemar de Jesus Silva, concede a</p>
