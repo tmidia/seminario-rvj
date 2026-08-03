@@ -122,13 +122,16 @@ export function DeclarationClient({
                 <header className="text-center">
                   {settings.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={settings.logo_url} alt="Logo do Seminário RVJ" crossOrigin="anonymous" className="mx-auto mb-5 h-24 max-w-[220px] object-contain" />
+                    <img src={settings.logo_url} alt="Logo do Seminário RVJ" crossOrigin="anonymous" className="mx-auto mb-5 h-32 max-w-[300px] object-contain" />
                   ) : (
-                    <div className="mb-5 flex justify-center text-[#0a3a2a]">
-                      <FileText size={54} strokeWidth={1.4} />
-                    </div>
+                    // Sem logotipo cadastrado, o nome escrito identifica o documento.
+                    <>
+                      <div className="mb-5 flex justify-center text-[#0a3a2a]">
+                        <FileText size={54} strokeWidth={1.4} />
+                      </div>
+                      <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#0a3a2a]">Seminário Teológico RVJ</p>
+                    </>
                   )}
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#0a3a2a]">Seminário Teológico RVJ</p>
                   <h1 className="mt-10 font-serif text-[31px] font-bold uppercase tracking-[0.08em] text-[#0a3a2a]">Declaração de Matrícula</h1>
                   <div className="mx-auto mt-5 h-1 w-24 bg-[#c29a4b]" />
                 </header>
